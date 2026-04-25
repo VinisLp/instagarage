@@ -5,18 +5,16 @@ import '../feed/feed_screen.dart';
 
 class InterestsPreviewScreen extends StatefulWidget {
   final List<String> selectedInterests;
-
-  const InterestsPreviewScreen({
-    super.key,
-    required this.selectedInterests,
-  });
+  const InterestsPreviewScreen({super.key, required this.selectedInterests});
 
   @override
   State<InterestsPreviewScreen> createState() => _InterestsPreviewScreenState();
 }
 
 class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
-  // ✅ Peças de exemplo por categoria
+  // Itens personalizados: emoji + nome
+  final List<({String emoji, String name})> _customPreviews = [];
+
   final Map<String, List<_PreviewPiece>> _piecesByCategory = {
     'Cards': [
       _PreviewPiece(
@@ -27,26 +25,12 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           garage: 'pokemon_rafael',
           garageEmoji: '🏎️'),
       _PreviewPiece(
-          emoji: '⚡',
-          name: 'Pikachu Illustrator',
-          series: 'Pokémon Promo · 1998',
-          value: 'R\$ 185.000',
-          garage: 'tcg_brasil',
-          garageEmoji: '🎴'),
-      _PreviewPiece(
           emoji: '🌿',
           name: 'Black Lotus',
           series: 'Magic Alpha · 1993',
           value: 'R\$ 85.000',
           garage: 'magic_sp',
           garageEmoji: '🧙'),
-      _PreviewPiece(
-          emoji: '🔵',
-          name: 'Mox Sapphire',
-          series: 'Magic Alpha · 1993',
-          value: 'R\$ 42.000',
-          garage: 'oldschool_mtg',
-          garageEmoji: '♟️'),
     ],
     'Quadrinhos': [
       _PreviewPiece(
@@ -63,20 +47,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 320.000',
           garage: 'comics_rj',
           garageEmoji: '📚'),
-      _PreviewPiece(
-          emoji: '🦸',
-          name: 'X-Men #1',
-          series: 'Marvel · 1963',
-          value: 'R\$ 28.000',
-          garage: 'xmen_collector',
-          garageEmoji: '🔴'),
-      _PreviewPiece(
-          emoji: '💪',
-          name: 'Fantastic Four #1',
-          series: 'Marvel · 1961',
-          value: 'R\$ 35.000',
-          garage: 'marvel_sp',
-          garageEmoji: '🦸'),
     ],
     'Vinils & CDs': [
       _PreviewPiece(
@@ -93,20 +63,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 2.800',
           garage: 'beatles_col',
           garageEmoji: '🎵'),
-      _PreviewPiece(
-          emoji: '🌙',
-          name: 'Dark Side of the Moon',
-          series: 'LP · 1973',
-          value: 'R\$ 1.800',
-          garage: 'floyd_collector',
-          garageEmoji: '🌑'),
-      _PreviewPiece(
-          emoji: '🕺',
-          name: 'Thriller',
-          series: 'LP · 1982',
-          value: 'R\$ 950',
-          garage: 'mj_fans',
-          garageEmoji: '🎤'),
     ],
     'Miniaturas': [
       _PreviewPiece(
@@ -123,20 +79,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 950',
           garage: 'hw_vintage',
           garageEmoji: '🏁'),
-      _PreviewPiece(
-          emoji: '🚂',
-          name: 'Märklin BR 01',
-          series: 'Escala HO · 1955',
-          value: 'R\$ 3.200',
-          garage: 'trains_sp',
-          garageEmoji: '🚂'),
-      _PreviewPiece(
-          emoji: '✈️',
-          name: 'Spitfire Mk.I',
-          series: 'Corgi 1:72 · 1940',
-          value: 'R\$ 680',
-          garage: 'warbirds_br',
-          garageEmoji: '✈️'),
     ],
     'Action Figures': [
       _PreviewPiece(
@@ -153,20 +95,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 2.200',
           garage: 'starwars_col',
           garageEmoji: '⭐'),
-      _PreviewPiece(
-          emoji: '🐍',
-          name: 'Snake Eyes',
-          series: 'GI Joe · 1982',
-          value: 'R\$ 890',
-          garage: 'joe_collector',
-          garageEmoji: '🎖️'),
-      _PreviewPiece(
-          emoji: '🤖',
-          name: 'Optimus Prime G1',
-          series: 'Hasbro · 1984',
-          value: 'R\$ 3.500',
-          garage: 'tf_brasil',
-          garageEmoji: '🔧'),
     ],
     'Camisas Retrô': [
       _PreviewPiece(
@@ -183,20 +111,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 1.800',
           garage: 'calcio_vintage',
           garageEmoji: '⚽'),
-      _PreviewPiece(
-          emoji: '🔵',
-          name: 'Barcelona 1998/99',
-          series: 'Nike · La Liga',
-          value: 'R\$ 2.400',
-          garage: 'barca_retro',
-          garageEmoji: '🔵'),
-      _PreviewPiece(
-          emoji: '⚪',
-          name: 'Real Madrid 1998/99',
-          series: 'Kelme · La Liga',
-          value: 'R\$ 1.600',
-          garage: 'retro_shirts',
-          garageEmoji: '👕'),
     ],
     'Games & Consoles': [
       _PreviewPiece(
@@ -213,20 +127,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 950',
           garage: 'handheld_col',
           garageEmoji: '👾'),
-      _PreviewPiece(
-          emoji: '🔵',
-          name: 'Sega Mega Drive',
-          series: 'Sega · 1988',
-          value: 'R\$ 1.200',
-          garage: 'sega_brasil',
-          garageEmoji: '🔵'),
-      _PreviewPiece(
-          emoji: '🟣',
-          name: 'Neo Geo AES',
-          series: 'SNK · 1990',
-          value: 'R\$ 8.500',
-          garage: 'neogeo_rare',
-          garageEmoji: '🕹️'),
     ],
     'Lego': [
       _PreviewPiece(
@@ -236,20 +136,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 4.200',
           garage: 'lego_col',
           garageEmoji: '🧱'),
-      _PreviewPiece(
-          emoji: '🗼',
-          name: 'Eiffel Tower',
-          series: '#10307 · 2022',
-          value: 'R\$ 2.800',
-          garage: 'afol_brasil',
-          garageEmoji: '🏗️'),
-      _PreviewPiece(
-          emoji: '🚢',
-          name: 'Titanic',
-          series: '#10294 · 2021',
-          value: 'R\$ 3.500',
-          garage: 'lego_icons',
-          garageEmoji: '⚓'),
       _PreviewPiece(
           emoji: '🏰',
           name: 'Hogwarts Castle',
@@ -273,20 +159,6 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 1.200',
           garage: 'pop_brasil',
           garageEmoji: '✨'),
-      _PreviewPiece(
-          emoji: '🕷️',
-          name: 'Spider-Man #03',
-          series: 'Marvel · 1st Ed.',
-          value: 'R\$ 650',
-          garage: 'funko_rare',
-          garageEmoji: '🎭'),
-      _PreviewPiece(
-          emoji: '⚡',
-          name: 'Iron Man #03',
-          series: 'Marvel · Metallic',
-          value: 'R\$ 780',
-          garage: 'pop_collector',
-          garageEmoji: '🤖'),
     ],
     'Sneakers': [
       _PreviewPiece(
@@ -303,28 +175,13 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
           value: 'R\$ 3.200',
           garage: 'kicks_rj',
           garageEmoji: '👟'),
-      _PreviewPiece(
-          emoji: '🔵',
-          name: 'Air Max 1 OG',
-          series: 'Nike · 1987',
-          value: 'R\$ 4.800',
-          garage: 'airmax_col',
-          garageEmoji: '💨'),
-      _PreviewPiece(
-          emoji: '⚫',
-          name: 'New Balance 550',
-          series: 'NB · Aime Leon',
-          value: 'R\$ 2.100',
-          garage: 'nb_collector',
-          garageEmoji: 'N'),
     ],
   };
 
   List<_PreviewPiece> get _filteredPieces {
-    final List<_PreviewPiece> result = [];
+    final result = <_PreviewPiece>[];
     for (final interest in widget.selectedInterests) {
-      final pieces = _piecesByCategory[interest] ?? [];
-      result.addAll(pieces.take(2)); // 2 peças por categoria
+      result.addAll((_piecesByCategory[interest] ?? []).take(2));
     }
     return result;
   }
@@ -336,6 +193,224 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const FeedScreen()));
     }
+  }
+
+  // Dialog com ícones — igual ao da tela 2
+  void _openAddCustom() {
+    final nameController = TextEditingController();
+    String selectedEmoji = '📦';
+    final emojis = [
+      '📦',
+      '🔩',
+      '🪙',
+      '🎯',
+      '🧸',
+      '🪆',
+      '🎪',
+      '🧩',
+      '🪅',
+      '💡',
+      '🔬',
+      '🎻',
+      '🥊',
+      '🏅',
+      '🗿',
+      '🪖',
+      '🧲',
+      '🎠'
+    ];
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.75),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setD) => Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 420,
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1814),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF2E2A22)),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 16, 0),
+                    child: Row(children: [
+                      Text('ADICIONAR COLEÇÃO',
+                          style: GoogleFonts.bebasNeue(
+                              fontSize: 18,
+                              color: const Color(0xFFF0ECE4),
+                              letterSpacing: 2)),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: const Color(0xFF242018),
+                              borderRadius: BorderRadius.circular(8),
+                              border:
+                                  Border.all(color: const Color(0xFF2E2A22))),
+                          child: const Icon(Icons.close_rounded,
+                              color: Color(0xFF7A7060), size: 15),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                        'Quer adicionar algo diferente ao seu perfil? Escreva aqui!',
+                        style: GoogleFonts.familjenGrotesk(
+                            fontSize: 12, color: const Color(0xFF7A7060))),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(color: Color(0xFF2E2A22), height: 1),
+                  const SizedBox(height: 16),
+
+                  // Seleção de ícone
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('ESCOLHA UM ÍCONE',
+                              style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 9,
+                                  color: const Color(0xFF7A7060),
+                                  letterSpacing: 1.5)),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: emojis
+                                .map((e) => GestureDetector(
+                                      onTap: () =>
+                                          setD(() => selectedEmoji = e),
+                                      child: AnimatedContainer(
+                                        duration:
+                                            const Duration(milliseconds: 150),
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: selectedEmoji == e
+                                              ? const Color(0xFFD4622A)
+                                                  .withOpacity(0.15)
+                                              : const Color(0xFF242018),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: selectedEmoji == e
+                                                ? const Color(0xFFD4622A)
+                                                : const Color(0xFF2E2A22),
+                                            width: selectedEmoji == e ? 1.5 : 1,
+                                          ),
+                                        ),
+                                        child: Center(
+                                            child: Text(e,
+                                                style: const TextStyle(
+                                                    fontSize: 20))),
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ]),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Campo de nome
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('O QUE VOCÊ COLECIONA?',
+                              style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 9,
+                                  color: const Color(0xFF7A7060),
+                                  letterSpacing: 1.5)),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: nameController,
+                            autofocus: true,
+                            style: GoogleFonts.familjenGrotesk(
+                                color: const Color(0xFFF0ECE4), fontSize: 14),
+                            decoration: InputDecoration(
+                              hintText: 'Ex: Garrafas Antigas, Tampinhas...',
+                              hintStyle: GoogleFonts.familjenGrotesk(
+                                  color: const Color(0xFF4A4438), fontSize: 13),
+                              filled: true,
+                              fillColor: const Color(0xFF242018),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFF3A3428))),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFF3A3428))),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFFD4622A))),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 12),
+                            ),
+                            onChanged: (_) => setD(() {}),
+                          ),
+                        ]),
+                  ),
+                  const SizedBox(height: 20),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: ElevatedButton(
+                        onPressed: nameController.text.trim().isEmpty
+                            ? null
+                            : () {
+                                setState(() => _customPreviews.add((
+                                      emoji: selectedEmoji,
+                                      name: nameController.text.trim(),
+                                    )));
+                                Navigator.pop(context);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: nameController.text.trim().isEmpty
+                              ? const Color(0xFF2E2A22)
+                              : const Color(0xFFD4622A),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text('ADICIONAR À MINHA LISTA',
+                            style: GoogleFonts.bebasNeue(
+                                fontSize: 15,
+                                letterSpacing: 1.5,
+                                color: nameController.text.trim().isEmpty
+                                    ? const Color(0xFF4A4438)
+                                    : Colors.white)),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -350,151 +425,183 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
         child: Center(
           child: SizedBox(
             width: isDesktop ? 680.0 : double.infinity,
-            child: Column(
-              children: [
-                // ── HEADER ──
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                  child: Column(
-                    children: [
-                      // ✅ Progress 2/3
-                      Row(
-                        children: List.generate(
-                            3,
-                            (i) => Expanded(
-                                  child: Container(
-                                    height: 3,
-                                    margin:
-                                        EdgeInsets.only(right: i < 2 ? 4 : 0),
-                                    decoration: BoxDecoration(
-                                      color: i <= 1
-                                          ? const Color(0xFFD4622A)
-                                          : const Color(0xFF2E2A22),
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
-                                )),
-                      ),
-                      const SizedBox(height: 32),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('INSTA',
-                              style: GoogleFonts.bebasNeue(
-                                  fontSize: 22,
-                                  color: const Color(0xFFF0ECE4),
-                                  letterSpacing: 4)),
-                          Text('COLLECTION',
-                              style: GoogleFonts.bebasNeue(
-                                  fontSize: 22,
-                                  color: const Color(0xFFD4622A),
-                                  letterSpacing: 4)),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      Text('PEÇAS DO SEU\nINTERESSE',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.bebasNeue(
-                              fontSize: isDesktop ? 36 : 30,
-                              color: const Color(0xFFF0ECE4),
-                              letterSpacing: 2,
-                              height: 1.1)),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Baseado nos seus interesses, essas são algumas peças que você vai encontrar na plataforma',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.familjenGrotesk(
-                            fontSize: 13,
-                            color: const Color(0xFF7A7060),
-                            height: 1.4),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // ✅ Tags dos interesses selecionados
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        alignment: WrapAlignment.center,
-                        children: widget.selectedInterests
-                            .map((name) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
+            child: Column(children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                child: Column(children: [
+                  Row(
+                      children: List.generate(
+                          3,
+                          (i) => Expanded(
+                                child: Container(
+                                  height: 3,
+                                  margin: EdgeInsets.only(right: i < 2 ? 4 : 0),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD4622A)
-                                        .withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: const Color(0xFFD4622A)
-                                            .withOpacity(0.4)),
+                                    color: i <= 1
+                                        ? const Color(0xFFD4622A)
+                                        : const Color(0xFF2E2A22),
+                                    borderRadius: BorderRadius.circular(2),
                                   ),
-                                  child: Text(name,
-                                      style: GoogleFonts.familjenGrotesk(
-                                          fontSize: 11,
-                                          color: const Color(0xFFD4622A),
-                                          fontWeight: FontWeight.w600)),
-                                ))
-                            .toList(),
-                      ),
-                    ],
+                                ),
+                              ))),
+                  const SizedBox(height: 32),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Text('INSTA',
+                        style: GoogleFonts.bebasNeue(
+                            fontSize: 22,
+                            color: const Color(0xFFF0ECE4),
+                            letterSpacing: 4)),
+                    Text('COLLECTION',
+                        style: GoogleFonts.bebasNeue(
+                            fontSize: 22,
+                            color: const Color(0xFFD4622A),
+                            letterSpacing: 4)),
+                  ]),
+                  const SizedBox(height: 24),
+                  Text('PEÇAS DO SEU\nINTERESSE',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.bebasNeue(
+                          fontSize: isDesktop ? 36 : 30,
+                          color: const Color(0xFFF0ECE4),
+                          letterSpacing: 2,
+                          height: 1.1)),
+                  const SizedBox(height: 10),
+                  Text(
+                      'Baseado nos seus interesses, essas são algumas peças que você vai encontrar na plataforma',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.familjenGrotesk(
+                          fontSize: 13,
+                          color: const Color(0xFF7A7060),
+                          height: 1.4)),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    alignment: WrapAlignment.center,
+                    children: widget.selectedInterests
+                        .map((name) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD4622A).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: const Color(0xFFD4622A)
+                                        .withOpacity(0.4)),
+                              ),
+                              child: Text(name,
+                                  style: GoogleFonts.familjenGrotesk(
+                                      fontSize: 11,
+                                      color: const Color(0xFFD4622A),
+                                      fontWeight: FontWeight.w600)),
+                            ))
+                        .toList(),
                   ),
-                ),
+                ]),
+              ),
 
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                // ── LISTA DE PEÇAS ──
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                    itemCount: pieces.length,
-                    itemBuilder: (context, index) {
-                      final piece = pieces[index];
-                      return _PiecePreviewCard(piece: piece);
-                    },
-                  ),
-                ),
+              // Lista de peças + custom + botão adicionar
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  itemCount: pieces.length + _customPreviews.length + 1,
+                  itemBuilder: (context, index) {
+                    // Peças normais
+                    if (index < pieces.length) {
+                      return _PiecePreviewCard(piece: pieces[index]);
+                    }
 
-                // ── BOTÃO ENTRAR NO FEED ──
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _enterFeed,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFD4622A),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('EXPLORAR MINHA GARAGEM 🏎️',
-                                  style: GoogleFonts.bebasNeue(
-                                      fontSize: 17,
-                                      letterSpacing: 1.5,
-                                      color: Colors.white)),
-                            ],
-                          ),
+                    // Itens personalizados adicionados
+                    final customIndex = index - pieces.length;
+                    if (customIndex < _customPreviews.length) {
+                      final item = _customPreviews[customIndex];
+                      return _CustomPreviewCard(
+                          emoji: item.emoji, name: item.name);
+                    }
+
+                    // Card de adicionar — sempre por último
+                    return GestureDetector(
+                      onTap: _openAddCustom,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A1814),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: const Color(0xFFD4622A).withOpacity(0.35),
+                              width: 1.5),
                         ),
+                        child: Row(children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFD4622A).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: const Icon(Icons.add_rounded,
+                                color: Color(0xFFD4622A), size: 26),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                Text('Adicionar item da sua preferência',
+                                    style: GoogleFonts.familjenGrotesk(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFFD4622A))),
+                                const SizedBox(height: 4),
+                                Text(
+                                    'Não achou o que você coleciona? Escreva aqui e personalize seu perfil.',
+                                    style: GoogleFonts.familjenGrotesk(
+                                        fontSize: 11,
+                                        color: const Color(0xFF7A7060),
+                                        height: 1.4)),
+                              ])),
+                          const Icon(Icons.arrow_forward_ios_rounded,
+                              color: Color(0xFFD4622A), size: 14),
+                        ]),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Você encontrará muito mais dentro do app!',
-                        style: GoogleFonts.familjenGrotesk(
-                            fontSize: 11, color: const Color(0xFF4A4438)),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+
+              // Botão entrar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                child: Column(children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _enterFeed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD4622A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text('EXPLORAR MINHA GARAGEM 🏎️',
+                          style: GoogleFonts.bebasNeue(
+                              fontSize: 17,
+                              letterSpacing: 1.5,
+                              color: Colors.white)),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text('Você encontrará muito mais dentro do app!',
+                      style: GoogleFonts.familjenGrotesk(
+                          fontSize: 11, color: const Color(0xFF4A4438))),
+                ]),
+              ),
+            ]),
           ),
         ),
       ),
@@ -502,18 +609,72 @@ class _InterestsPreviewScreenState extends State<InterestsPreviewScreen> {
   }
 }
 
-// ── CARD DE PREVIEW ──
+// ── Card de item personalizado adicionado (com emoji escolhido) ──
+class _CustomPreviewCard extends StatelessWidget {
+  final String emoji, name;
+  const _CustomPreviewCard({required this.emoji, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1814),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF4CAF7A).withOpacity(0.3)),
+      ),
+      child: Row(children: [
+        Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+              color: const Color(0xFF4CAF7A).withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12)),
+          child:
+              Center(child: Text(emoji, style: const TextStyle(fontSize: 36))),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(name,
+              style: GoogleFonts.familjenGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFF0ECE4))),
+          const SizedBox(height: 4),
+          Text('Adicionado por você',
+              style: GoogleFonts.familjenGrotesk(
+                  fontSize: 11, color: const Color(0xFF7A7060))),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+                color: const Color(0xFF4CAF7A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: const Color(0xFF4CAF7A).withOpacity(0.3))),
+            child: Text('✓ Na sua lista',
+                style: GoogleFonts.jetBrainsMono(
+                    fontSize: 9, color: const Color(0xFF4CAF7A))),
+          ),
+        ])),
+      ]),
+    );
+  }
+}
+
+// ── Card de peça ──
 class _PiecePreviewCard extends StatefulWidget {
   final _PreviewPiece piece;
   const _PiecePreviewCard({required this.piece});
-
   @override
   State<_PiecePreviewCard> createState() => _PiecePreviewCardState();
 }
 
 class _PiecePreviewCardState extends State<_PiecePreviewCard> {
   bool _liked = false;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -524,80 +685,60 @@ class _PiecePreviewCardState extends State<_PiecePreviewCard> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF2E2A22)),
       ),
-      child: Row(
-        children: [
-          // ✅ Imagem da peça
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
+      child: Row(children: [
+        Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
               color: const Color(0xFF242018),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-                child: Text(widget.piece.emoji,
-                    style: const TextStyle(fontSize: 36))),
+              borderRadius: BorderRadius.circular(12)),
+          child: Center(
+              child: Text(widget.piece.emoji,
+                  style: const TextStyle(fontSize: 36))),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(widget.piece.name,
+              style: GoogleFonts.familjenGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFF0ECE4))),
+          const SizedBox(height: 3),
+          Text(widget.piece.series,
+              style: GoogleFonts.familjenGrotesk(
+                  fontSize: 11, color: const Color(0xFF7A7060))),
+          const SizedBox(height: 8),
+          Row(children: [
+            Text(widget.piece.garageEmoji,
+                style: const TextStyle(fontSize: 12)),
+            const SizedBox(width: 4),
+            Text('@${widget.piece.garage}',
+                style: GoogleFonts.familjenGrotesk(
+                    fontSize: 11, color: const Color(0xFF7A7060))),
+          ]),
+        ])),
+        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Text(widget.piece.value,
+              style: GoogleFonts.bebasNeue(
+                  fontSize: 16,
+                  color: const Color(0xFFD4A020),
+                  letterSpacing: 1)),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => setState(() => _liked = !_liked),
+            child: Icon(_liked ? Icons.favorite : Icons.favorite_border,
+                color:
+                    _liked ? const Color(0xFFD4622A) : const Color(0xFF4A4438),
+                size: 22),
           ),
-          const SizedBox(width: 14),
-
-          // ✅ Infos
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.piece.name,
-                    style: GoogleFonts.familjenGrotesk(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFF0ECE4))),
-                const SizedBox(height: 3),
-                Text(widget.piece.series,
-                    style: GoogleFonts.familjenGrotesk(
-                        fontSize: 11, color: const Color(0xFF7A7060))),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(widget.piece.garageEmoji,
-                        style: const TextStyle(fontSize: 12)),
-                    const SizedBox(width: 4),
-                    Text('@${widget.piece.garage}',
-                        style: GoogleFonts.familjenGrotesk(
-                            fontSize: 11, color: const Color(0xFF7A7060))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // ✅ Valor + curtir
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(widget.piece.value,
-                  style: GoogleFonts.bebasNeue(
-                      fontSize: 16,
-                      color: const Color(0xFFD4A020),
-                      letterSpacing: 1)),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () => setState(() => _liked = !_liked),
-                child: Icon(
-                  _liked ? Icons.favorite : Icons.favorite_border,
-                  color: _liked
-                      ? const Color(0xFFD4622A)
-                      : const Color(0xFF4A4438),
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ]),
+      ]),
     );
   }
 }
 
-// ── MODELO ──
 class _PreviewPiece {
   final String emoji, name, series, value, garage, garageEmoji;
   const _PreviewPiece({

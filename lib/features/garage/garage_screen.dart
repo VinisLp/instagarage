@@ -8,6 +8,421 @@ import '../piece/ai_scan_screen.dart';
 import '../dm/dm_screen.dart';
 import '../marketplace/marketplace_screen.dart';
 
+// ═══════════════════════════════════════════════════════════════════
+// DIALOG DE EDIÇÃO DE PERFIL
+// ═══════════════════════════════════════════════════════════════════
+class EditProfileDialog extends StatefulWidget {
+  final String currentName;
+  final String currentHandle;
+  final String currentBio;
+  final String currentEmoji;
+  final Function(String name, String handle, String bio, String emoji) onSave;
+
+  const EditProfileDialog({
+    super.key,
+    required this.currentName,
+    required this.currentHandle,
+    required this.currentBio,
+    required this.currentEmoji,
+    required this.onSave,
+  });
+
+  @override
+  State<EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<EditProfileDialog> {
+  late TextEditingController _nameCtrl;
+  late TextEditingController _handleCtrl;
+  late TextEditingController _bioCtrl;
+  late String _selectedEmoji;
+  bool _saving = false;
+
+  final List<String> _avatarEmojis = [
+    '🏎️',
+    '🎸',
+    '🐲',
+    '🦸',
+    '📮',
+    '🚂',
+    '🎴',
+    '🚗',
+    '👕',
+    '🏆',
+    '⭐',
+    '🔥',
+    '🎯',
+    '🎮',
+    '🎨',
+    '📸',
+    '🦋',
+    '🌟',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.currentName);
+    _handleCtrl = TextEditingController(text: widget.currentHandle);
+    _bioCtrl = TextEditingController(text: widget.currentBio);
+    _selectedEmoji = widget.currentEmoji;
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _handleCtrl.dispose();
+    _bioCtrl.dispose();
+    super.dispose();
+  }
+
+  void _save() async {
+    if (_nameCtrl.text.trim().isEmpty) return;
+    setState(() => _saving = true);
+    await Future.delayed(const Duration(milliseconds: 400));
+    widget.onSave(
+      _nameCtrl.text.trim(),
+      _handleCtrl.text.trim(),
+      _bioCtrl.text.trim(),
+      _selectedEmoji,
+    );
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 480,
+          constraints: const BoxConstraints(maxHeight: 640),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1814),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF2E2A22)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 30,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Header ──
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+                  decoration: const BoxDecoration(
+                    border:
+                        Border(bottom: BorderSide(color: Color(0xFF2E2A22))),
+                  ),
+                  child: Row(children: [
+                    Text('EDITAR PERFIL',
+                        style: GoogleFonts.bebasNeue(
+                            fontSize: 20,
+                            color: const Color(0xFFF0ECE4),
+                            letterSpacing: 2)),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.close_rounded,
+                          color: Color(0xFF7A7060), size: 22),
+                    ),
+                  ]),
+                ),
+
+                // ── Conteúdo scrollável ──
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Avatar atual + picker ──
+                        Center(
+                          child: Column(children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF242018),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: const Color(0xFFD4622A), width: 2),
+                              ),
+                              child: Center(
+                                child: Text(_selectedEmoji,
+                                    style: const TextStyle(fontSize: 40)),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text('ESCOLHER AVATAR',
+                                style: GoogleFonts.jetBrainsMono(
+                                    fontSize: 9,
+                                    color: const Color(0xFF7A7060),
+                                    letterSpacing: 1.5)),
+                          ]),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // ── Grade de emojis ──
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF242018),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFF2E2A22)),
+                          ),
+                          child: GridView.count(
+                            crossAxisCount: 6,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            children: _avatarEmojis.map((emoji) {
+                              final selected = emoji == _selectedEmoji;
+                              return GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectedEmoji = emoji),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? const Color(0xFFD4622A)
+                                            .withOpacity(0.2)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: selected
+                                          ? const Color(0xFFD4622A)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(emoji,
+                                        style: const TextStyle(fontSize: 22)),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // ── Campo Nome ──
+                        _FieldLabel('NOME'),
+                        const SizedBox(height: 6),
+                        _InputField(
+                          controller: _nameCtrl,
+                          hint: 'Seu nome de exibição',
+                          maxLength: 30,
+                        ),
+                        const SizedBox(height: 14),
+
+                        // ── Campo @ ──
+                        _FieldLabel('USUÁRIO'),
+                        const SizedBox(height: 6),
+                        _InputField(
+                          controller: _handleCtrl,
+                          hint: '@seuusuario',
+                          prefix: '@',
+                          maxLength: 20,
+                        ),
+                        const SizedBox(height: 14),
+
+                        // ── Campo Bio ──
+                        _FieldLabel('BIO'),
+                        const SizedBox(height: 6),
+                        _InputField(
+                          controller: _bioCtrl,
+                          hint: 'Conte um pouco sobre você e sua coleção...',
+                          maxLines: 3,
+                          maxLength: 150,
+                        ),
+                        const SizedBox(height: 6),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ValueListenableBuilder(
+                            valueListenable: _bioCtrl,
+                            builder: (_, val, __) => Text(
+                              '${_bioCtrl.text.length}/150',
+                              style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 9, color: const Color(0xFF4A4438)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Footer com botões ──
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+                  decoration: const BoxDecoration(
+                    border: Border(top: BorderSide(color: Color(0xFF2E2A22))),
+                  ),
+                  child: Row(children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: const Color(0xFF3A3428)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Text('CANCELAR',
+                                style: GoogleFonts.bebasNeue(
+                                    fontSize: 14,
+                                    letterSpacing: 1.5,
+                                    color: const Color(0xFF7A7060))),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _saving ? null : _save,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD4622A),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: _saving
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2))
+                                : Text('SALVAR',
+                                    style: GoogleFonts.bebasNeue(
+                                        fontSize: 14,
+                                        letterSpacing: 1.5,
+                                        color: Colors.white)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Widgets auxiliares do dialog ──
+class _FieldLabel extends StatelessWidget {
+  final String text;
+  const _FieldLabel(this.text);
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: GoogleFonts.jetBrainsMono(
+            fontSize: 9,
+            color: const Color(0xFF7A7060),
+            letterSpacing: 1.5,
+            fontWeight: FontWeight.w600));
+  }
+}
+
+class _InputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final String? prefix;
+  final int maxLines;
+  final int? maxLength;
+
+  const _InputField({
+    required this.controller,
+    required this.hint,
+    this.prefix,
+    this.maxLines = 1,
+    this.maxLength,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      maxLength: maxLength,
+      style: GoogleFonts.familjenGrotesk(
+          color: const Color(0xFFF0ECE4), fontSize: 14),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.familjenGrotesk(
+            color: const Color(0xFF4A4438), fontSize: 14),
+        prefixText: prefix,
+        prefixStyle: GoogleFonts.familjenGrotesk(
+            color: const Color(0xFF7A7060), fontSize: 14),
+        filled: true,
+        fillColor: const Color(0xFF242018),
+        counterText: '',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF2E2A22)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF2E2A22)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFD4622A)),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      ),
+    );
+  }
+}
+
+// ── Função helper para abrir o dialog ──
+void openEditProfileDialog({
+  required BuildContext context,
+  required String name,
+  required String handle,
+  required String bio,
+  required String emoji,
+  required Function(String, String, String, String) onSave,
+}) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'Fechar',
+    barrierColor: Colors.black.withOpacity(0.6),
+    transitionDuration: const Duration(milliseconds: 220),
+    transitionBuilder: (ctx, anim, _, w) => ScaleTransition(
+      scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
+      child: FadeTransition(opacity: anim, child: w),
+    ),
+    pageBuilder: (ctx, _, __) => EditProfileDialog(
+      currentName: name,
+      currentHandle: handle,
+      currentBio: bio,
+      currentEmoji: emoji,
+      onSave: onSave,
+    ),
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GARAGE SCREEN — com edição de perfil integrada
+// ═══════════════════════════════════════════════════════════════════
 class GarageScreen extends StatefulWidget {
   const GarageScreen({super.key});
 
@@ -20,10 +435,17 @@ class _GarageScreenState extends State<GarageScreen>
   late TabController _tabController;
   final user = Supabase.instance.client.auth.currentUser;
 
+  // ── Dados do perfil editáveis ──
+  String _profileName = 'MEU PERFIL';
+  String _profileHandle = '';
+  String _profileBio = 'Colecionador apaixonado 🔥 Adicione sua bio aqui';
+  String _profileEmoji = '🏎️';
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _profileHandle = user?.email?.split('@')[0] ?? 'usuario';
   }
 
   @override
@@ -32,20 +454,35 @@ class _GarageScreenState extends State<GarageScreen>
     super.dispose();
   }
 
+  void _openEditProfile() {
+    openEditProfileDialog(
+      context: context,
+      name: _profileName,
+      handle: _profileHandle,
+      bio: _profileBio,
+      emoji: _profileEmoji,
+      onSave: (name, handle, bio, emoji) {
+        setState(() {
+          _profileName = name;
+          _profileHandle = handle;
+          _profileBio = bio;
+          _profileEmoji = emoji;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     final isDesktop = !isMobile;
-    // ✅ No desktop centraliza o conteúdo em 860px
     const contentWidth = 860.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0E0B),
       body: isDesktop
-          // ── LAYOUT DESKTOP ──
           ? _buildDesktopLayout(contentWidth)
-          // ── LAYOUT MOBILE ──
           : _buildMobileLayout(isMobile),
       bottomNavigationBar: _BottomNav(
         currentIndex: 2,
@@ -71,9 +508,6 @@ class _GarageScreenState extends State<GarageScreen>
     );
   }
 
-  // ══════════════════════════════════════
-  // LAYOUT MOBILE — original com NestedScrollView
-  // ══════════════════════════════════════
   Widget _buildMobileLayout(bool isMobile) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -96,9 +530,6 @@ class _GarageScreenState extends State<GarageScreen>
     );
   }
 
-  // ══════════════════════════════════════
-  // LAYOUT DESKTOP — duas colunas
-  // ══════════════════════════════════════
   Widget _buildDesktopLayout(double contentWidth) {
     return SafeArea(
       child: Center(
@@ -107,7 +538,6 @@ class _GarageScreenState extends State<GarageScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ Coluna esquerda: perfil fixo (280px)
               SizedBox(
                 width: 280,
                 child: SingleChildScrollView(
@@ -115,43 +545,35 @@ class _GarageScreenState extends State<GarageScreen>
                   child: _buildDesktopSidebar(),
                 ),
               ),
-
-              // ✅ Divider vertical
               Container(width: 1, color: const Color(0xFF2E2A22)),
-
-              // ✅ Coluna direita: abas + conteúdo
               Expanded(
                 child: NestedScrollView(
                   headerSliverBuilder: (context, innerBoxIsScrolled) => [
                     SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          // Abas no desktop
-                          TabBar(
-                            controller: _tabController,
-                            indicatorColor: const Color(0xFFD4622A),
-                            indicatorWeight: 2,
-                            labelColor: const Color(0xFFD4622A),
-                            unselectedLabelColor: const Color(0xFF7A7060),
-                            labelStyle: GoogleFonts.bebasNeue(
-                                fontSize: 13, letterSpacing: 1.5),
-                            unselectedLabelStyle: GoogleFonts.bebasNeue(
-                                fontSize: 13, letterSpacing: 1.5),
-                            tabs: const [
-                              Tab(text: 'PEÇAS'),
-                              Tab(text: 'POSTS'),
-                              Tab(text: 'WISHLIST'),
-                            ],
-                          ),
-                        ],
-                      ),
+                      child: Column(children: [
+                        const SizedBox(height: 16),
+                        TabBar(
+                          controller: _tabController,
+                          indicatorColor: const Color(0xFFD4622A),
+                          indicatorWeight: 2,
+                          labelColor: const Color(0xFFD4622A),
+                          unselectedLabelColor: const Color(0xFF7A7060),
+                          labelStyle: GoogleFonts.bebasNeue(
+                              fontSize: 13, letterSpacing: 1.5),
+                          unselectedLabelStyle: GoogleFonts.bebasNeue(
+                              fontSize: 13, letterSpacing: 1.5),
+                          tabs: const [
+                            Tab(text: 'PEÇAS'),
+                            Tab(text: 'POSTS'),
+                            Tab(text: 'WISHLIST'),
+                          ],
+                        ),
+                      ]),
                     ),
                   ],
                   body: TabBarView(
                     controller: _tabController,
                     children: [
-                      // ✅ No desktop, grid de 4 colunas
                       _PiecesGrid(crossAxisCount: 4),
                       const _EmptyState(
                           icon: '📸',
@@ -172,283 +594,247 @@ class _GarageScreenState extends State<GarageScreen>
     );
   }
 
-  // ✅ Sidebar do desktop com perfil completo
   Widget _buildDesktopSidebar() {
-    final handle = user?.email?.split('@')[0] ?? 'usuario';
-
-    return Column(
-      children: [
-        // Avatar grande
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: const Color(0xFF242018),
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFFD4622A), width: 2),
-          ),
-          child:
-              const Center(child: Text('🏎️', style: TextStyle(fontSize: 48))),
+    return Column(children: [
+      // Avatar
+      Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: const Color(0xFF242018),
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFD4622A), width: 2),
         ),
-        const SizedBox(height: 16),
-        Text('MEU PERFIL',
-            style: GoogleFonts.bebasNeue(
-                fontSize: 24,
-                color: const Color(0xFFF0ECE4),
-                letterSpacing: 2)),
-        const SizedBox(height: 4),
-        Text('@$handle',
-            style: GoogleFonts.familjenGrotesk(
-                fontSize: 13, color: const Color(0xFF7A7060))),
-        const SizedBox(height: 16),
-        Text('Colecionador apaixonado 🔥 Adicione sua bio aqui',
-            style: GoogleFonts.familjenGrotesk(
-                fontSize: 13, color: const Color(0xFF7A7060), height: 1.4),
-            textAlign: TextAlign.center),
-        const SizedBox(height: 20),
+        child: Center(
+            child: Text(_profileEmoji, style: const TextStyle(fontSize: 48))),
+      ),
+      const SizedBox(height: 16),
+      Text(_profileName,
+          style: GoogleFonts.bebasNeue(
+              fontSize: 24, color: const Color(0xFFF0ECE4), letterSpacing: 2)),
+      const SizedBox(height: 4),
+      Text('@$_profileHandle',
+          style: GoogleFonts.familjenGrotesk(
+              fontSize: 13, color: const Color(0xFF7A7060))),
+      const SizedBox(height: 12),
+      Text(_profileBio,
+          style: GoogleFonts.familjenGrotesk(
+              fontSize: 13, color: const Color(0xFF7A7060), height: 1.4),
+          textAlign: TextAlign.center),
+      const SizedBox(height: 20),
 
-        // Botão editar
-        SizedBox(
+      // ── Botão EDITAR PERFIL — abre o dialog ──
+      SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: _openEditProfile,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFF0ECE4),
+            side: const BorderSide(color: Color(0xFF3A3428)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+          child: Text('EDITAR PERFIL',
+              style: GoogleFonts.bebasNeue(fontSize: 14, letterSpacing: 1.5)),
+        ),
+      ),
+      const SizedBox(height: 20),
+
+      // Stats
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1814),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF2E2A22)),
+        ),
+        child: Column(children: [
+          _DesktopStatRow(value: '0', label: 'PEÇAS'),
+          const Divider(color: Color(0xFF2E2A22), height: 20),
+          _DesktopStatRow(value: '0', label: 'SEGUIDORES'),
+          const Divider(color: Color(0xFF2E2A22), height: 20),
+          _DesktopStatRow(value: 'R\$ 0', label: 'VALOR TOTAL'),
+        ]),
+      ),
+      const SizedBox(height: 20),
+
+      // Botão sair
+      GestureDetector(
+        onTap: () async {
+          await Supabase.instance.client.auth.signOut();
+        },
+        child: Container(
           width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFF0ECE4),
-              side: const BorderSide(color: Color(0xFF3A3428)),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            child: Text('EDITAR PERFIL',
-                style: GoogleFonts.bebasNeue(fontSize: 14, letterSpacing: 1.5)),
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        // Stats verticais
-        Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: const Color(0xFF1A1814),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF2E2A22)),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFF3A3428)),
           ),
-          child: Column(
-            children: [
-              _DesktopStatRow(value: '0', label: 'PEÇAS'),
-              const Divider(color: Color(0xFF2E2A22), height: 20),
-              _DesktopStatRow(value: '0', label: 'SEGUIDORES'),
-              const Divider(color: Color(0xFF2E2A22), height: 20),
-              _DesktopStatRow(value: 'R\$ 0', label: 'VALOR TOTAL'),
-            ],
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.logout, color: Color(0xFF7A7060), size: 16),
+            const SizedBox(width: 8),
+            Text('SAIR',
+                style: GoogleFonts.bebasNeue(
+                    fontSize: 14,
+                    letterSpacing: 1.5,
+                    color: const Color(0xFF7A7060))),
+          ]),
+        ),
+      ),
+    ]);
+  }
+
+  Widget _buildHeader({required bool isMobile}) {
+    return Column(children: [
+      Stack(clipBehavior: Clip.none, children: [
+        Container(
+          width: double.infinity,
+          height: 120,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1a0800), Color(0xFF3a1800), Color(0xFF1a0a02)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Center(
+              child: Text(_profileEmoji, style: const TextStyle(fontSize: 48))),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 60,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Color(0xFF0F0E0B)],
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 20),
-
-        // Botão sair
-        GestureDetector(
-          onTap: () async {
-            await Supabase.instance.client.auth.signOut();
-          },
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1814),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF3A3428)),
+        Positioned(
+          top: 40,
+          right: 16,
+          child: GestureDetector(
+            onTap: () async {
+              await Supabase.instance.client.auth.signOut();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child:
+                  const Icon(Icons.logout, color: Color(0xFFF0ECE4), size: 18),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          ),
+        ),
+      ]),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Container(
+            width: 72,
+            height: 72,
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF242018),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF0F0E0B), width: 3),
+            ),
+            child: Center(
+                child:
+                    Text(_profileEmoji, style: const TextStyle(fontSize: 32))),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Icon(Icons.logout, color: Color(0xFF7A7060), size: 16),
-                const SizedBox(width: 8),
-                Text('SAIR',
+                Text(_profileName,
                     style: GoogleFonts.bebasNeue(
-                        fontSize: 14,
-                        letterSpacing: 1.5,
-                        color: const Color(0xFF7A7060))),
+                        fontSize: 20,
+                        color: const Color(0xFFF0ECE4),
+                        letterSpacing: 2)),
+                Text('@$_profileHandle',
+                    style: GoogleFonts.familjenGrotesk(
+                        fontSize: 12, color: const Color(0xFF7A7060))),
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  // ── HEADER MOBILE ──
-  Widget _buildHeader({required bool isMobile}) {
-    final handle = user?.email?.split('@')[0] ?? 'usuario';
-
-    return Column(
-      children: [
-        // Banner
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 120,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF1a0800),
-                    Color(0xFF3a1800),
-                    Color(0xFF1a0a02)
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+          // ── Botão EDITAR mobile — abre o dialog ──
+          Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: OutlinedButton(
+              onPressed: _openEditProfile,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFF0ECE4),
+                side: const BorderSide(color: Color(0xFF3A3428)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
-              child: const Center(
-                  child: Text('🏎️', style: TextStyle(fontSize: 48))),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 60,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xFF0F0E0B)],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 40,
-              right: 16,
-              child: GestureDetector(
-                onTap: () async {
-                  await Supabase.instance.client.auth.signOut();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.logout,
-                      color: Color(0xFFF0ECE4), size: 18),
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        // Perfil row
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF242018),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF0F0E0B), width: 3),
-                ),
-                child: const Center(
-                    child: Text('🏎️', style: TextStyle(fontSize: 32))),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text('MEU PERFIL',
-                        style: GoogleFonts.bebasNeue(
-                          fontSize: 20,
-                          color: const Color(0xFFF0ECE4),
-                          letterSpacing: 2,
-                        )),
-                    Text('@$handle',
-                        style: GoogleFonts.familjenGrotesk(
-                            fontSize: 12, color: const Color(0xFF7A7060))),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFF0ECE4),
-                    side: const BorderSide(color: Color(0xFF3A3428)),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                  child: Text('EDITAR',
-                      style: GoogleFonts.bebasNeue(
-                          fontSize: 13, letterSpacing: 1.5)),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Bio
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Colecionador apaixonado 🔥 Adicione sua bio aqui',
-                style: GoogleFonts.familjenGrotesk(
-                    fontSize: 13, color: const Color(0xFF7A7060))),
-          ),
-        ),
-
-        // Stats
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Color(0xFF2E2A22)),
-              bottom: BorderSide(color: Color(0xFF2E2A22)),
+              child: Text('EDITAR',
+                  style:
+                      GoogleFonts.bebasNeue(fontSize: 13, letterSpacing: 1.5)),
             ),
           ),
-          child: Row(
-            children: [
-              _StatItem(value: '0', label: 'PEÇAS'),
-              _StatDivider(),
-              _StatItem(value: '0', label: 'SEGUIDORES'),
-              _StatDivider(),
-              _StatItem(value: 'R\$0', label: 'VALOR'),
-            ],
+        ]),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(_profileBio,
+              style: GoogleFonts.familjenGrotesk(
+                  fontSize: 13, color: const Color(0xFF7A7060))),
+        ),
+      ),
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Color(0xFF2E2A22)),
+            bottom: BorderSide(color: Color(0xFF2E2A22)),
           ),
         ),
-
-        // Tabs mobile
-        TabBar(
-          controller: _tabController,
-          indicatorColor: const Color(0xFFD4622A),
-          indicatorWeight: 2,
-          labelColor: const Color(0xFFD4622A),
-          unselectedLabelColor: const Color(0xFF7A7060),
-          labelStyle: GoogleFonts.bebasNeue(fontSize: 13, letterSpacing: 1.5),
-          unselectedLabelStyle:
-              GoogleFonts.bebasNeue(fontSize: 13, letterSpacing: 1.5),
-          tabs: const [
-            Tab(text: 'PEÇAS'),
-            Tab(text: 'POSTS'),
-            Tab(text: 'WISHLIST'),
-          ],
-        ),
-      ],
-    );
+        child: Row(children: [
+          _StatItem(value: '0', label: 'PEÇAS'),
+          _StatDivider(),
+          _StatItem(value: '0', label: 'SEGUIDORES'),
+          _StatDivider(),
+          _StatItem(value: 'R\$0', label: 'VALOR'),
+        ]),
+      ),
+      TabBar(
+        controller: _tabController,
+        indicatorColor: const Color(0xFFD4622A),
+        indicatorWeight: 2,
+        labelColor: const Color(0xFFD4622A),
+        unselectedLabelColor: const Color(0xFF7A7060),
+        labelStyle: GoogleFonts.bebasNeue(fontSize: 13, letterSpacing: 1.5),
+        unselectedLabelStyle:
+            GoogleFonts.bebasNeue(fontSize: 13, letterSpacing: 1.5),
+        tabs: const [
+          Tab(text: 'PEÇAS'),
+          Tab(text: 'POSTS'),
+          Tab(text: 'WISHLIST'),
+        ],
+      ),
+    ]);
   }
 }
 
-// ── GRADE DE PEÇAS ✅ crossAxisCount configurável ──
+// ── Widgets auxiliares ──
+
 class _PiecesGrid extends StatelessWidget {
   final int crossAxisCount;
   const _PiecesGrid({required this.crossAxisCount});
@@ -478,7 +864,6 @@ class _PiecesGrid extends StatelessWidget {
   }
 }
 
-// ── ESTADO VAZIO ──
 class _EmptyState extends StatelessWidget {
   final String icon, title, subtitle;
   const _EmptyState(
@@ -487,28 +872,24 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 48)),
-          const SizedBox(height: 16),
-          Text(title,
-              style: GoogleFonts.bebasNeue(
-                  fontSize: 20,
-                  color: const Color(0xFF4A4438),
-                  letterSpacing: 2)),
-          const SizedBox(height: 8),
-          Text(subtitle,
-              style: GoogleFonts.familjenGrotesk(
-                  fontSize: 13, color: const Color(0xFF4A4438)),
-              textAlign: TextAlign.center),
-        ],
-      ),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text(icon, style: const TextStyle(fontSize: 48)),
+        const SizedBox(height: 16),
+        Text(title,
+            style: GoogleFonts.bebasNeue(
+                fontSize: 20,
+                color: const Color(0xFF4A4438),
+                letterSpacing: 2)),
+        const SizedBox(height: 8),
+        Text(subtitle,
+            style: GoogleFonts.familjenGrotesk(
+                fontSize: 13, color: const Color(0xFF4A4438)),
+            textAlign: TextAlign.center),
+      ]),
     );
   }
 }
 
-// ── STAT ITEM (mobile horizontal) ──
 class _StatItem extends StatelessWidget {
   final String value, label;
   const _StatItem({required this.value, required this.label});
@@ -516,50 +897,37 @@ class _StatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          Text(value,
-              style: GoogleFonts.bebasNeue(
-                  fontSize: 22,
-                  color: const Color(0xFFF0ECE4),
-                  letterSpacing: 1)),
-          Text(label,
-              style: GoogleFonts.jetBrainsMono(
-                  fontSize: 9,
-                  color: const Color(0xFF7A7060),
-                  letterSpacing: 1)),
-        ],
-      ),
+      child: Column(children: [
+        Text(value,
+            style: GoogleFonts.bebasNeue(
+                fontSize: 22,
+                color: const Color(0xFFF0ECE4),
+                letterSpacing: 1)),
+        Text(label,
+            style: GoogleFonts.jetBrainsMono(
+                fontSize: 9, color: const Color(0xFF7A7060), letterSpacing: 1)),
+      ]),
     );
   }
 }
 
-// ── STAT ROW (desktop vertical) ──
 class _DesktopStatRow extends StatelessWidget {
   final String value, label;
   const _DesktopStatRow({required this.value, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label,
-            style: GoogleFonts.jetBrainsMono(
-                fontSize: 10,
-                color: const Color(0xFF7A7060),
-                letterSpacing: 1)),
-        Text(value,
-            style: GoogleFonts.bebasNeue(
-                fontSize: 20,
-                color: const Color(0xFFF0ECE4),
-                letterSpacing: 1)),
-      ],
-    );
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Text(label,
+          style: GoogleFonts.jetBrainsMono(
+              fontSize: 10, color: const Color(0xFF7A7060), letterSpacing: 1)),
+      Text(value,
+          style: GoogleFonts.bebasNeue(
+              fontSize: 20, color: const Color(0xFFF0ECE4), letterSpacing: 1)),
+    ]);
   }
 }
 
-// ── STAT DIVIDER ──
 class _StatDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -567,7 +935,6 @@ class _StatDivider extends StatelessWidget {
   }
 }
 
-// ── BOTTOM NAV ──
 class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final bool isDesktop;
@@ -586,55 +953,49 @@ class _BottomNav extends StatelessWidget {
         color: Color(0xFF1A1814),
         border: Border(top: BorderSide(color: Color(0xFF2E2A22))),
       ),
-      // ✅ No desktop centraliza a nav
       child: Center(
         child: SizedBox(
           width: isDesktop ? 860.0 : double.infinity,
-          child: Row(
-            children: [
-              _NavItem(
-                  icon: Icons.home_rounded,
-                  label: '',
-                  active: currentIndex == 0,
-                  onTap: () => onTap(0)),
-              _NavItem(
-                  icon: Icons.search_rounded,
-                  label: 'EXPLORAR',
-                  active: currentIndex == 1,
-                  onTap: () => onTap(1)),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(2),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD4622A),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(Icons.add,
-                            color: Colors.white, size: 26),
-                      ),
-                    ],
+          child: Row(children: [
+            _NavItem(
+                icon: Icons.home_rounded,
+                label: '',
+                active: currentIndex == 0,
+                onTap: () => onTap(0)),
+            _NavItem(
+                icon: Icons.search_rounded,
+                label: 'EXPLORAR',
+                active: currentIndex == 1,
+                onTap: () => onTap(1)),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onTap(2),
+                child:
+                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4622A),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 26),
                   ),
-                ),
+                ]),
               ),
-              _NavItem(
-                  icon: Icons.chat_bubble_rounded,
-                  label: 'DMs',
-                  active: currentIndex == 3,
-                  onTap: () => onTap(3)),
-              _NavItem(
-                  icon: Icons.storefront_rounded,
-                  label: 'MARKET',
-                  active: currentIndex == 4,
-                  onTap: () => onTap(4)),
-            ],
-          ),
+            ),
+            _NavItem(
+                icon: Icons.chat_bubble_rounded,
+                label: 'DMs',
+                active: currentIndex == 3,
+                onTap: () => onTap(3)),
+            _NavItem(
+                icon: Icons.storefront_rounded,
+                label: 'MARKET',
+                active: currentIndex == 4,
+                onTap: () => onTap(4)),
+          ]),
         ),
       ),
     );
@@ -658,26 +1019,21 @@ class _NavItem extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon,
-                color:
-                    active ? const Color(0xFFD4622A) : const Color(0xFF7A7060),
-                size: 22),
-            if (label.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              Text(label,
-                  style: GoogleFonts.jetBrainsMono(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(icon,
+              color: active ? const Color(0xFFD4622A) : const Color(0xFF7A7060),
+              size: 22),
+          if (label.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(label,
+                style: GoogleFonts.jetBrainsMono(
                     fontSize: 8,
                     color: active
                         ? const Color(0xFFD4622A)
                         : const Color(0xFF7A7060),
-                    letterSpacing: 0.5,
-                  )),
-            ],
+                    letterSpacing: 0.5)),
           ],
-        ),
+        ]),
       ),
     );
   }

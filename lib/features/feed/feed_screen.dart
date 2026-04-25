@@ -220,7 +220,9 @@ class _StoryDialog extends StatefulWidget {
 
 class _StoryDialogState extends State<_StoryDialog>
     with SingleTickerProviderStateMixin {
-  late int _current;
+  late int _storyIndex; // qual story (pessoa)
+  int _photoIndex = 0; // qual foto dentro do story
+  bool _paused = false;
   final _replyController = TextEditingController();
   bool _showEmojis = false;
   late AnimationController _progressCtrl;
@@ -240,15 +242,24 @@ class _StoryDialogState extends State<_StoryDialog>
     '⚡'
   ];
 
+  // Cada story tem N fotos
+  static const _storyPhotos = [
+    ['🏎️', '🏆', '🔥'], // rafael — 3 fotos
+    ['🎸', '🎵', '🎶'], // vinyl_br — 3 fotos
+    ['🦸', '🦸‍♂️', '🦸‍♀️'], // marvels — 3 fotos
+    ['🚂', '🚃', '🚄'], // trains — 3 fotos
+    ['📮', '✉️', '📬'], // stamps — 3 fotos
+  ];
+
   @override
   void initState() {
     super.initState();
-    _current = widget.initialIndex;
+    _storyIndex = widget.initialIndex;
     _progressCtrl =
-        AnimationController(vsync: this, duration: const Duration(seconds: 5))
+        AnimationController(vsync: this, duration: const Duration(seconds: 20))
           ..forward();
     _progressCtrl.addStatusListener((s) {
-      if (s == AnimationStatus.completed) _next();
+      if (s == AnimationStatus.completed) _nextPhoto();
     });
   }
 
@@ -259,25 +270,41 @@ class _StoryDialogState extends State<_StoryDialog>
     super.dispose();
   }
 
-  void _next() {
-    if (_current < _stories.length - 1) {
-      setState(() => _current++);
+  List<String> get _currentPhotos =>
+      _storyPhotos[_storyIndex.clamp(0, _storyPhotos.length - 1)];
+
+  void _nextPhoto() {
+    if (_photoIndex < _currentPhotos.length - 1) {
+      setState(() => _photoIndex++);
       _progressCtrl.forward(from: 0);
     } else {
+      // última foto: fecha o dialog
       Navigator.pop(context);
     }
   }
 
-  void _prev() {
-    if (_current > 0) {
-      setState(() => _current--);
+  void _prevPhoto() {
+    if (_photoIndex > 0) {
+      setState(() => _photoIndex--);
       _progressCtrl.forward(from: 0);
     }
   }
 
+  void _pause() {
+    setState(() => _paused = true);
+    _progressCtrl.stop();
+  }
+
+  void _resume() {
+    setState(() => _paused = false);
+    _progressCtrl.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final story = _stories[_current];
+    final story = _stories[_storyIndex.clamp(0, _stories.length - 1)];
+    final photos = _currentPhotos;
+    final currentEmoji = photos[_photoIndex];
     final size = MediaQuery.of(context).size;
     final w = (size.width * 0.85).clamp(300.0, 480.0);
     final h = (size.height * 0.82).clamp(500.0, 820.0);
@@ -295,12 +322,12 @@ class _StoryDialogState extends State<_StoryDialog>
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Column(children: [
-              // Barras de progresso por story
+              // ── Barras de progresso — uma por FOTO do story atual ──
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: Row(
                   children: List.generate(
-                      _stories.length,
+                      photos.length,
                       (i) => Expanded(
                             child: Container(
                               margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -308,13 +335,13 @@ class _StoryDialogState extends State<_StoryDialog>
                               decoration: BoxDecoration(
                                   color: const Color(0xFF3A3428),
                                   borderRadius: BorderRadius.circular(2)),
-                              child: i < _current
+                              child: i < _photoIndex
                                   ? Container(
                                       decoration: BoxDecoration(
                                           color: const Color(0xFFD4622A),
                                           borderRadius:
                                               BorderRadius.circular(2)))
-                                  : i == _current
+                                  : i == _photoIndex
                                       ? AnimatedBuilder(
                                           animation: _progressCtrl,
                                           builder: (_, __) =>
@@ -336,7 +363,7 @@ class _StoryDialogState extends State<_StoryDialog>
                 ),
               ),
 
-              // Header
+              // ── Header ──
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
                 child: Row(children: [
@@ -361,10 +388,24 @@ class _StoryDialogState extends State<_StoryDialog>
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFF0ECE4))),
-                        Text('agora · ${_current + 1}/${_stories.length}',
+                        Text('agora · foto ${_photoIndex + 1}/${photos.length}',
                             style: GoogleFonts.familjenGrotesk(
                                 fontSize: 10, color: const Color(0xFF7A7060))),
                       ])),
+                  if (_paused)
+                    Container(
+                      margin: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFD4A020).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(6)),
+                      child: Text('PAUSADO',
+                          style: GoogleFonts.jetBrainsMono(
+                              fontSize: 8,
+                              color: const Color(0xFFD4A020),
+                              letterSpacing: 0.5)),
+                    ),
                   GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: const Icon(Icons.close_rounded,
@@ -372,77 +413,107 @@ class _StoryDialogState extends State<_StoryDialog>
                 ]),
               ),
 
-              // Conteúdo + setas de navegação
+              // ── Conteúdo — segurar para pausar, setas para fotos ──
               Expanded(
-                  child: Stack(children: [
-                Positioned.fill(
-                    child: Container(
-                  margin: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: const Color(0xFF242018),
-                      borderRadius: BorderRadius.circular(14)),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(story.emoji, style: const TextStyle(fontSize: 90)),
-                        const SizedBox(height: 16),
-                        Text('Nova peça na coleção! 🔥',
-                            style: GoogleFonts.bebasNeue(
-                                fontSize: 20,
-                                color: const Color(0xFFF0ECE4),
-                                letterSpacing: 1)),
-                        const SizedBox(height: 6),
-                        Text('@${story.name}',
-                            style: GoogleFonts.familjenGrotesk(
-                                fontSize: 12, color: const Color(0xFF7A7060))),
-                      ]),
-                )),
-                // Seta esquerda
-                if (_current > 0)
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: GestureDetector(
-                      onTap: _prev,
+                  child: GestureDetector(
+                onLongPressStart: (_) => _pause(),
+                onLongPressEnd: (_) => _resume(),
+                child: Stack(children: [
+                  // Foto atual
+                  Positioned.fill(
                       child: Container(
-                        width: 56,
-                        alignment: Alignment.center,
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFF242018),
+                        borderRadius: BorderRadius.circular(14)),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(currentEmoji,
+                              style: const TextStyle(fontSize: 90)),
+                          const SizedBox(height: 16),
+                          Text('Nova peça na coleção! 🔥',
+                              style: GoogleFonts.bebasNeue(
+                                  fontSize: 20,
+                                  color: const Color(0xFFF0ECE4),
+                                  letterSpacing: 1)),
+                          const SizedBox(height: 6),
+                          Text('@${story.name}',
+                              style: GoogleFonts.familjenGrotesk(
+                                  fontSize: 12,
+                                  color: const Color(0xFF7A7060))),
+                          if (_paused) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 6),
+                              decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.pause_rounded,
+                                        color: Colors.white, size: 16),
+                                    const SizedBox(width: 6),
+                                    Text('Segurando...',
+                                        style: GoogleFonts.familjenGrotesk(
+                                            fontSize: 12, color: Colors.white)),
+                                  ]),
+                            ),
+                          ],
+                        ]),
+                  )),
+
+                  // Seta esquerda — foto anterior
+                  if (_photoIndex > 0)
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: GestureDetector(
+                        onTap: _prevPhoto,
                         child: Container(
-                            width: 34,
-                            height: 34,
-                            decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.45),
-                                shape: BoxShape.circle),
-                            child: const Icon(Icons.chevron_left_rounded,
-                                color: Colors.white, size: 22)),
+                          width: 56,
+                          alignment: Alignment.center,
+                          child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.45),
+                                  shape: BoxShape.circle),
+                              child: const Icon(Icons.chevron_left_rounded,
+                                  color: Colors.white, size: 22)),
+                        ),
                       ),
                     ),
-                  ),
-                // Seta direita
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: GestureDetector(
-                    onTap: _next,
-                    child: Container(
-                      width: 56,
-                      alignment: Alignment.center,
-                      child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.45),
-                              shape: BoxShape.circle),
-                          child: const Icon(Icons.chevron_right_rounded,
-                              color: Colors.white, size: 22)),
-                    ),
-                  ),
-                ),
-              ])),
 
-              // Emojis rápidos (expansível)
+                  // Seta direita — próxima foto
+                  if (_photoIndex < photos.length - 1)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: GestureDetector(
+                        onTap: _nextPhoto,
+                        child: Container(
+                          width: 56,
+                          alignment: Alignment.center,
+                          child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.45),
+                                  shape: BoxShape.circle),
+                              child: const Icon(Icons.chevron_right_rounded,
+                                  color: Colors.white, size: 22)),
+                        ),
+                      ),
+                    ),
+                ]),
+              )),
+
+              // ── Emojis rápidos ──
               if (_showEmojis)
                 Container(
                   padding:
@@ -477,7 +548,7 @@ class _StoryDialogState extends State<_StoryDialog>
                   ),
                 ),
 
-              // Input de resposta
+              // ── Input de resposta ──
               Container(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                 decoration: const BoxDecoration(
@@ -1300,11 +1371,9 @@ class _FeedScreenState extends State<FeedScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── COLUNA 1 — SIDEBAR ESQUERDA ──
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              width: _sidebarExpanded ? 240 : 64,
+            // ── COLUNA 1 — SIDEBAR ESQUERDA FIXA (sem toggle) ──
+            SizedBox(
+              width: 240,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
@@ -1312,13 +1381,10 @@ class _FeedScreenState extends State<FeedScreen> {
                       color: const Color(0xFF1A1814),
                       borderRadius: BorderRadius.circular(16)),
                   child: _DesktopLeftSidebar(
-                    expanded: _sidebarExpanded,
                     generalUnread: generalUnread,
                     personalUnread: personalUnread,
                     onGeneralNotif: _openGeneralNotifications,
                     onPersonalNotif: _openPersonalNotifications,
-                    onToggle: () =>
-                        setState(() => _sidebarExpanded = !_sidebarExpanded),
                     onNavigate: (index) {
                       if (index == 1)
                         Navigator.pushReplacement(
@@ -1363,67 +1429,102 @@ class _FeedScreenState extends State<FeedScreen> {
 
             const SizedBox(width: 8),
 
-            // ── COLUNA 2 — FEED CENTRAL ──
+            // ── COLUNA 2 — FEED CENTRAL com botão toggle na borda direita ──
             Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: const Color(0xFF1A1814),
-                      borderRadius: BorderRadius.circular(16)),
-                  child: Column(children: [
-                    // Stories — fade + colapso suave ao rolar
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 380),
-                      curve: Curves.easeInOut,
-                      opacity: _storiesVisible ? 1.0 : 0.0,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 420),
+              child: Stack(clipBehavior: Clip.none, children: [
+                // Card do feed
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: const Color(0xFF1A1814),
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Column(children: [
+                      // Stories — fade + colapso suave ao rolar
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 380),
                         curve: Curves.easeInOut,
-                        height: _storiesVisible ? 110 : 0,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                              border: Border(
-                                  bottom:
-                                      BorderSide(color: Color(0xFF2E2A22)))),
-                          child: SizedBox(
-                              height: 110,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                itemCount: _stories.length,
-                                itemBuilder: (context, index) => _StoryItem(
-                                    story: _stories[index], isDesktop: true),
-                              )),
+                        opacity: _storiesVisible ? 1.0 : 0.0,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 420),
+                          curve: Curves.easeInOut,
+                          height: _storiesVisible ? 110 : 0,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                border: Border(
+                                    bottom:
+                                        BorderSide(color: Color(0xFF2E2A22)))),
+                            child: SizedBox(
+                                height: 110,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  itemCount: _stories.length,
+                                  itemBuilder: (context, index) => _StoryItem(
+                                      story: _stories[index], isDesktop: true),
+                                )),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                        child: CustomScrollView(
-                      controller: _feedScrollController,
-                      slivers: [
-                        const SliverToBoxAdapter(child: SizedBox(height: 8)),
-                        SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                                (context, index) => _PostCard(
-                                    post: _posts[index], isDesktop: true),
-                                childCount: _posts.length)),
-                        const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                      ],
-                    )),
-                  ]),
+                      Expanded(
+                          child: CustomScrollView(
+                        controller: _feedScrollController,
+                        slivers: [
+                          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                          SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                  (context, index) => _PostCard(
+                                      post: _posts[index], isDesktop: true),
+                                  childCount: _posts.length)),
+                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                        ],
+                      )),
+                    ]),
+                  ),
                 ),
-              ),
+
+                // ── Botão toggle: flutua na borda DIREITA do feed, sempre visível ──
+                Positioned(
+                  right: -14,
+                  top: 24,
+                  child: GestureDetector(
+                    onTap: () =>
+                        setState(() => _sidebarExpanded = !_sidebarExpanded),
+                    child: Container(
+                      width: 26,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF242018),
+                        borderRadius: const BorderRadius.horizontal(
+                            right: Radius.circular(10)),
+                        border: Border.all(color: const Color(0xFF2E2A22)),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.35),
+                              blurRadius: 8)
+                        ],
+                      ),
+                      child: Icon(
+                        _sidebarExpanded
+                            ? Icons.chevron_right_rounded
+                            : Icons.chevron_left_rounded,
+                        color: const Color(0xFF7A7060),
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
             ),
 
             const SizedBox(width: 8),
 
-            // ── COLUNA 3 — SIDEBAR DIREITA (colapsa junto com a esquerda) ──
+            // ── COLUNA 3 — SIDEBAR DIREITA (colapsável) ──
             AnimatedContainer(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeInOut,
-              width: _sidebarExpanded ? 296 : 0, // 280 + 16 padding externo
+              width: _sidebarExpanded ? 296 : 0,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 180),
                 opacity: _sidebarExpanded ? 1.0 : 0.0,
@@ -1535,21 +1636,18 @@ class _FeedScreenState extends State<FeedScreen> {
 }
 
 // ═══════════════════════════════════════════════
-// SIDEBAR ESQUERDA COLAPSÁVEL
+// SIDEBAR ESQUERDA FIXA (sem toggle)
 // ═══════════════════════════════════════════════
 class _DesktopLeftSidebar extends StatelessWidget {
-  final bool expanded;
   final int generalUnread, personalUnread;
-  final VoidCallback onGeneralNotif, onPersonalNotif, onToggle;
+  final VoidCallback onGeneralNotif, onPersonalNotif;
   final Function(int) onNavigate;
 
   const _DesktopLeftSidebar({
-    required this.expanded,
     required this.generalUnread,
     required this.personalUnread,
     required this.onGeneralNotif,
     required this.onPersonalNotif,
-    required this.onToggle,
     required this.onNavigate,
   });
 
@@ -1560,70 +1658,44 @@ class _DesktopLeftSidebar extends StatelessWidget {
       child: SafeArea(
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Logo (sem botão toggle)
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 16, 10, 20),
-          child: Row(children: [
-            if (expanded)
-              Expanded(
-                  child: Text('INSTACOLLECTION',
-                      style: GoogleFonts.bebasNeue(
-                          fontSize: 15,
-                          color: const Color(0xFFD4622A),
-                          letterSpacing: 2))),
-            if (!expanded) const Spacer(),
-            GestureDetector(
-              onTap: onToggle,
-              child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                      color: const Color(0xFF242018),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF2E2A22))),
-                  child: Icon(
-                      expanded
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
-                      color: const Color(0xFF7A7060),
-                      size: 18)),
-            ),
-          ]),
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+          child: Text('INSTACOLLECTION',
+              style: GoogleFonts.bebasNeue(
+                  fontSize: 15,
+                  color: const Color(0xFFD4622A),
+                  letterSpacing: 2)),
         ),
         _SideNavItem(
             icon: Icons.home_rounded,
             label: 'FEED',
             active: true,
-            expanded: expanded,
             onTap: () {}),
         _SideNavItem(
             icon: Icons.search_rounded,
             label: 'EXPLORAR',
             active: false,
-            expanded: expanded,
             onTap: () => onNavigate(1)),
         _SideNavItem(
             icon: Icons.chat_bubble_rounded,
             label: 'DMs',
             active: false,
-            expanded: expanded,
             onTap: () => onNavigate(3)),
         _SideNavItem(
             icon: Icons.storefront_rounded,
             label: 'MARKET',
             active: false,
-            expanded: expanded,
             onTap: () => onNavigate(4)),
         _SideNavItem(
-            icon: Icons.garage_rounded,
-            label: 'GARAGEM',
+            icon: Icons.person_rounded,
+            label: 'PERFIL',
             active: false,
-            expanded: expanded,
             onTap: () => onNavigate(5)),
         _SideNavItem(
             icon: Icons.collections_bookmark_rounded,
             label: 'COLEÇÃO',
             active: false,
-            expanded: expanded,
             onTap: () => onNavigate(6)),
         const SizedBox(height: 4),
         Padding(
@@ -1634,14 +1706,12 @@ class _DesktopLeftSidebar extends StatelessWidget {
             icon: Icons.notifications_none_rounded,
             label: 'NOTIFICAÇÕES',
             active: false,
-            expanded: expanded,
             badge: generalUnread,
             onTap: onGeneralNotif),
         _SideNavItem(
             icon: Icons.person_outline_rounded,
             label: 'ATIVIDADE',
             active: false,
-            expanded: expanded,
             badge: personalUnread,
             onTap: onPersonalNotif),
         const Spacer(),
@@ -1651,26 +1721,21 @@ class _DesktopLeftSidebar extends StatelessWidget {
             onTap: () => onNavigate(2),
             child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                    vertical: 12, horizontal: expanded ? 16 : 0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
                     color: const Color(0xFFD4622A),
                     borderRadius: BorderRadius.circular(12)),
-                child: expanded
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                            const Icon(Icons.add,
-                                color: Colors.white, size: 18),
-                            const SizedBox(width: 6),
-                            Text('NOVA PEÇA',
-                                style: GoogleFonts.bebasNeue(
-                                    fontSize: 14,
-                                    letterSpacing: 1.5,
-                                    color: Colors.white)),
-                          ])
-                    : const Center(
-                        child: Icon(Icons.add, color: Colors.white, size: 22))),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Icon(Icons.add, color: Colors.white, size: 18),
+                  const SizedBox(width: 6),
+                  Text('NOVA PEÇA',
+                      style: GoogleFonts.bebasNeue(
+                          fontSize: 14,
+                          letterSpacing: 1.5,
+                          color: Colors.white)),
+                ])),
           ),
         ),
         GestureDetector(
@@ -1688,24 +1753,22 @@ class _DesktopLeftSidebar extends StatelessWidget {
                           color: const Color(0xFFD4622A), width: 1.5)),
                   child: const Center(
                       child: Text('🏎️', style: TextStyle(fontSize: 15)))),
-              if (expanded) ...[
-                const SizedBox(width: 10),
-                Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                      Text('rafael',
-                          style: GoogleFonts.familjenGrotesk(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFF0ECE4))),
-                      Text('@rafael_col',
-                          style: GoogleFonts.familjenGrotesk(
-                              fontSize: 10, color: const Color(0xFF7A7060))),
-                    ])),
-                const Icon(Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFF4A4438), size: 12),
-              ],
+              const SizedBox(width: 10),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Text('rafael',
+                        style: GoogleFonts.familjenGrotesk(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFF0ECE4))),
+                    Text('@rafael_col',
+                        style: GoogleFonts.familjenGrotesk(
+                            fontSize: 10, color: const Color(0xFF7A7060))),
+                  ])),
+              const Icon(Icons.arrow_forward_ios_rounded,
+                  color: Color(0xFF4A4438), size: 12),
             ]),
           ),
         ),
@@ -1717,14 +1780,13 @@ class _DesktopLeftSidebar extends StatelessWidget {
 class _SideNavItem extends StatelessWidget {
   final IconData icon;
   final String label;
-  final bool active, expanded;
+  final bool active;
   final int badge;
   final VoidCallback onTap;
   const _SideNavItem(
       {required this.icon,
       required this.label,
       required this.active,
-      required this.expanded,
       required this.onTap,
       this.badge = 0});
 
@@ -1734,59 +1796,37 @@ class _SideNavItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        padding:
-            EdgeInsets.symmetric(horizontal: expanded ? 12 : 0, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
             color: active
                 ? const Color(0xFFD4622A).withOpacity(0.12)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10)),
-        child: expanded
-            ? Row(children: [
-                Icon(icon,
-                    color: active
-                        ? const Color(0xFFD4622A)
-                        : const Color(0xFF7A7060),
-                    size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                    child: Text(label,
-                        style: GoogleFonts.bebasNeue(
-                            fontSize: 13,
-                            letterSpacing: 1,
-                            color: active
-                                ? const Color(0xFFD4622A)
-                                : const Color(0xFFB0A898)))),
-                if (badge > 0)
-                  Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: const Color(0xFFD4622A),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Text('$badge',
-                          style: GoogleFonts.jetBrainsMono(
-                              fontSize: 9,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700))),
-              ])
-            : Stack(alignment: Alignment.center, children: [
-                Icon(icon,
-                    color: active
-                        ? const Color(0xFFD4622A)
-                        : const Color(0xFF7A7060),
-                    size: 22),
-                if (badge > 0)
-                  Positioned(
-                      top: 0,
-                      right: 6,
-                      child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                              color: Color(0xFFD4622A),
-                              shape: BoxShape.circle))),
-              ]),
+        child: Row(children: [
+          Icon(icon,
+              color: active ? const Color(0xFFD4622A) : const Color(0xFF7A7060),
+              size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Text(label,
+                  style: GoogleFonts.bebasNeue(
+                      fontSize: 13,
+                      letterSpacing: 1,
+                      color: active
+                          ? const Color(0xFFD4622A)
+                          : const Color(0xFFB0A898)))),
+          if (badge > 0)
+            Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                    color: const Color(0xFFD4622A),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Text('$badge',
+                    style: GoogleFonts.jetBrainsMono(
+                        fontSize: 9,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700))),
+        ]),
       ),
     );
   }
@@ -3160,7 +3200,7 @@ class _BottomNav extends StatelessWidget {
         child: Row(children: [
           _NavItem(
               icon: Icons.home_rounded,
-              label: '',
+              label: 'FEED',
               active: currentIndex == 0,
               onTap: () => onTap(0)),
           _NavItem(
