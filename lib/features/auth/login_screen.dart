@@ -6,7 +6,6 @@ final supabase = Supabase.instance.client;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -19,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLogin = true;
   bool _obscurePassword = true;
 
+  // ── Autenticação por email/senha ──
   Future<void> _authenticate() async {
     setState(() => _isLoading = true);
     try {
@@ -34,21 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } on AuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_friendlyError(e.message),
-              style: GoogleFonts.familjenGrotesk(fontSize: 13)),
-          backgroundColor: const Color(0xFFD44A4A),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ));
-      }
+      if (mounted) _showError(_friendlyError(e.message));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  // ── Google OAuth ──
   Future<void> _signInWithGoogle() async {
     setState(() => _isGoogleLoading = true);
     try {
@@ -57,42 +49,13 @@ class _LoginScreenState extends State<LoginScreen> {
         redirectTo: 'io.supabase.instacollection://login-callback',
       );
     } on AuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_friendlyError(e.message),
-              style: GoogleFonts.familjenGrotesk(fontSize: 13)),
-          backgroundColor: const Color(0xFFD44A4A),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ));
-      }
+      if (mounted) _showError(_friendlyError(e.message));
     } finally {
       if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
 
-  Future<void> _signInWithApple() async {
-    try {
-      await supabase.auth.signInWithOAuth(
-        OAuthProvider.apple,
-        redirectTo: 'io.supabase.instacollection://login-callback',
-      );
-    } on AuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_friendlyError(e.message),
-              style: GoogleFonts.familjenGrotesk(fontSize: 13)),
-          backgroundColor: const Color(0xFFD44A4A),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ));
-      }
-    }
-  }
-
-  // ── LOGIN COM TELEFONE — dialog centralizado ──
+  // ── Login por telefone ──
   void _openPhoneLogin() {
     final phoneController = TextEditingController();
     final otpController = TextEditingController();
@@ -138,16 +101,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             GestureDetector(
                               onTap: () => Navigator.pop(context),
                               child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    color: const Color(0xFF242018),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                        color: const Color(0xFF2E2A22))),
-                                child: const Icon(Icons.close_rounded,
-                                    color: Color(0xFF7A7060), size: 15),
-                              ),
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFF242018),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color: const Color(0xFF2E2A22))),
+                                  child: const Icon(Icons.close_rounded,
+                                      color: Color(0xFF7A7060), size: 15)),
                             ),
                           ]),
                         ),
@@ -167,72 +129,76 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
 
                         if (!otpSent) ...[
-                          // Campo telefone
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('NÚMERO DE TELEFONE',
-                                    style: GoogleFonts.jetBrainsMono(
-                                        fontSize: 9,
-                                        color: const Color(0xFF7A7060),
-                                        letterSpacing: 1.5)),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  autofocus: true,
-                                  style: GoogleFonts.familjenGrotesk(
-                                      color: const Color(0xFFF0ECE4),
-                                      fontSize: 15),
-                                  decoration: InputDecoration(
-                                    hintText: '11 99999-9999',
-                                    hintStyle: GoogleFonts.familjenGrotesk(
-                                        color: const Color(0xFF4A4438),
-                                        fontSize: 14),
-                                    filled: true,
-                                    fillColor: const Color(0xFF242018),
-                                    prefixIcon: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12),
-                                      child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text('🇧🇷',
-                                                style: TextStyle(fontSize: 18)),
-                                            const SizedBox(width: 6),
-                                            Text('+55',
-                                                style:
-                                                    GoogleFonts.familjenGrotesk(
-                                                        color: const Color(
-                                                            0xFF7A7060),
-                                                        fontSize: 14)),
-                                            const SizedBox(width: 8),
-                                            Container(
-                                                width: 1,
-                                                height: 20,
-                                                color: const Color(0xFF3A3428)),
-                                          ]),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('NÚMERO DE TELEFONE',
+                                      style: GoogleFonts.jetBrainsMono(
+                                          fontSize: 9,
+                                          color: const Color(0xFF7A7060),
+                                          letterSpacing: 1.5)),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    autofocus: true,
+                                    style: GoogleFonts.familjenGrotesk(
+                                        color: const Color(0xFFF0ECE4),
+                                        fontSize: 15),
+                                    decoration: InputDecoration(
+                                      hintText: '11 99999-9999',
+                                      hintStyle: GoogleFonts.familjenGrotesk(
+                                          color: const Color(0xFF4A4438),
+                                          fontSize: 14),
+                                      filled: true,
+                                      fillColor: const Color(0xFF242018),
+                                      prefixIcon: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12),
+                                        child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Text('🇧🇷',
+                                                  style:
+                                                      TextStyle(fontSize: 18)),
+                                              const SizedBox(width: 6),
+                                              Text('+55',
+                                                  style: GoogleFonts
+                                                      .familjenGrotesk(
+                                                          color: const Color(
+                                                              0xFF7A7060),
+                                                          fontSize: 14)),
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                  width: 1,
+                                                  height: 20,
+                                                  color:
+                                                      const Color(0xFF3A3428)),
+                                            ]),
+                                      ),
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFF3A3428))),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFF3A3428))),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFFD4622A))),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 14),
                                     ),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFF3A3428))),
-                                    enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFF3A3428))),
-                                    focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFFD4622A))),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 14),
                                   ),
-                                ),
-                              ],
-                            ),
+                                ]),
                           ),
                           const SizedBox(height: 20),
                           Padding(
@@ -258,29 +224,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                           });
                                         } on AuthException catch (e) {
                                           setInner(() => loading = false);
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
-                                              content: Text(
-                                                  _friendlyError(e.message),
-                                                  style: GoogleFonts
-                                                      .familjenGrotesk(
-                                                          fontSize: 13)),
-                                              backgroundColor:
-                                                  const Color(0xFFD44A4A),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                            ));
-                                          }
+                                          if (context.mounted)
+                                            _showError(
+                                                _friendlyError(e.message));
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD4622A),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                  elevation: 0,
-                                ),
+                                    backgroundColor: const Color(0xFFD4622A),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                    elevation: 0),
                                 child: loading
                                     ? const SizedBox(
                                         width: 20,
@@ -295,66 +250,70 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ] else ...[
-                          // Campo OTP
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('CÓDIGO DE VERIFICAÇÃO',
-                                    style: GoogleFonts.jetBrainsMono(
-                                        fontSize: 9,
-                                        color: const Color(0xFF7A7060),
-                                        letterSpacing: 1.5)),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: otpController,
-                                  keyboardType: TextInputType.number,
-                                  autofocus: true,
-                                  maxLength: 6,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.bebasNeue(
-                                      color: const Color(0xFFF0ECE4),
-                                      fontSize: 28,
-                                      letterSpacing: 8),
-                                  decoration: InputDecoration(
-                                    hintText: '000000',
-                                    hintStyle: GoogleFonts.bebasNeue(
-                                        color: const Color(0xFF4A4438),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('CÓDIGO DE VERIFICAÇÃO',
+                                      style: GoogleFonts.jetBrainsMono(
+                                          fontSize: 9,
+                                          color: const Color(0xFF7A7060),
+                                          letterSpacing: 1.5)),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: otpController,
+                                    keyboardType: TextInputType.number,
+                                    autofocus: true,
+                                    maxLength: 6,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.bebasNeue(
+                                        color: const Color(0xFFF0ECE4),
                                         fontSize: 28,
                                         letterSpacing: 8),
-                                    filled: true,
-                                    fillColor: const Color(0xFF242018),
-                                    counterText: '',
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFF3A3428))),
-                                    enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFF3A3428))),
-                                    focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFFD4622A))),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 16),
+                                    decoration: InputDecoration(
+                                      hintText: '000000',
+                                      hintStyle: GoogleFonts.bebasNeue(
+                                          color: const Color(0xFF4A4438),
+                                          fontSize: 28,
+                                          letterSpacing: 8),
+                                      filled: true,
+                                      fillColor: const Color(0xFF242018),
+                                      counterText: '',
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFF3A3428))),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFF3A3428))),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFFD4622A))),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 16),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 10),
-                                GestureDetector(
-                                  onTap: () => setInner(() => otpSent = false),
-                                  child: Text('Reenviar código',
-                                      style: GoogleFonts.familjenGrotesk(
-                                          fontSize: 12,
-                                          color: const Color(0xFFD4622A),
-                                          decoration: TextDecoration.underline,
-                                          decorationColor:
-                                              const Color(0xFFD4622A))),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(height: 10),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        setInner(() => otpSent = false),
+                                    child: Text('Reenviar código',
+                                        style: GoogleFonts.familjenGrotesk(
+                                            fontSize: 12,
+                                            color: const Color(0xFFD4622A),
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor:
+                                                const Color(0xFFD4622A))),
+                                  ),
+                                ]),
                           ),
                           const SizedBox(height: 20),
                           Padding(
@@ -380,29 +339,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                             Navigator.pop(context);
                                         } on AuthException catch (e) {
                                           setInner(() => loading = false);
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
-                                              content: Text(
-                                                  _friendlyError(e.message),
-                                                  style: GoogleFonts
-                                                      .familjenGrotesk(
-                                                          fontSize: 13)),
-                                              backgroundColor:
-                                                  const Color(0xFFD44A4A),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                            ));
-                                          }
+                                          if (context.mounted)
+                                            _showError(
+                                                _friendlyError(e.message));
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD4622A),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                  elevation: 0,
-                                ),
+                                    backgroundColor: const Color(0xFFD4622A),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                    elevation: 0),
                                 child: loading
                                     ? const SizedBox(
                                         width: 20,
@@ -429,170 +377,179 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ── RECUPERAR SENHA — dialog centralizado ──
+  // ── Recuperar senha ──
   void _openForgotPassword() {
     final emailController = TextEditingController(text: _emailController.text);
-
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.75),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setD) {
-          bool sent = false;
-          bool loading = false;
-
-          return Center(
+      builder: (context) => StatefulBuilder(builder: (context, setD) {
+        bool sent = false;
+        bool loading = false;
+        return Center(
             child: Material(
-              color: Colors.transparent,
-              child: Container(
-                width: 440,
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1814),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2E2A22)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: StatefulBuilder(
-                    builder: (context, setInner) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 18, 16, 0),
-                          child: Row(children: [
-                            Text('RECUPERAR SENHA',
-                                style: GoogleFonts.bebasNeue(
-                                    fontSize: 18,
-                                    color: const Color(0xFFF0ECE4),
-                                    letterSpacing: 2)),
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    color: const Color(0xFF242018),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                        color: const Color(0xFF2E2A22))),
-                                child: const Icon(Icons.close_rounded,
-                                    color: Color(0xFF7A7060), size: 15),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        const SizedBox(height: 6),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                              'Enviaremos um link de redefinição para seu email',
-                              style: GoogleFonts.familjenGrotesk(
-                                  fontSize: 12,
-                                  color: const Color(0xFF7A7060))),
-                        ),
-                        const SizedBox(height: 16),
-                        const Divider(color: Color(0xFF2E2A22), height: 1),
-                        const SizedBox(height: 16),
-
-                        if (!sent) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: _InputField(
-                              controller: emailController,
-                              label: 'EMAIL',
-                              hint: 'seu@email.com',
-                              keyboardType: TextInputType.emailAddress,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: ElevatedButton(
-                                onPressed: loading
-                                    ? null
-                                    : () async {
-                                        setInner(() => loading = true);
-                                        try {
-                                          await supabase.auth
-                                              .resetPasswordForEmail(
-                                                  emailController.text.trim());
-                                          setInner(() {
-                                            sent = true;
-                                            loading = false;
-                                          });
-                                        } catch (_) {
-                                          setInner(() => loading = false);
-                                        }
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD4622A),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                  elevation: 0,
-                                ),
-                                child: loading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2))
-                                    : Text('ENVIAR LINK',
-                                        style: GoogleFonts.bebasNeue(
-                                            fontSize: 16, letterSpacing: 2)),
-                              ),
-                            ),
-                          ),
-                        ] else ...[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                            child: Column(children: [
-                              const Text('✅', style: TextStyle(fontSize: 48)),
-                              const SizedBox(height: 16),
-                              Text('Email enviado!',
-                                  style: GoogleFonts.bebasNeue(
-                                      fontSize: 22,
-                                      color: const Color(0xFF4CAF7A),
-                                      letterSpacing: 1)),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.',
-                                style: GoogleFonts.familjenGrotesk(
-                                    fontSize: 13,
-                                    color: const Color(0xFF7A7060),
-                                    height: 1.5),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 20),
-                              GestureDetector(
-                                onTap: () => Navigator.pop(context),
-                                child: Text('FECHAR',
-                                    style: GoogleFonts.bebasNeue(
-                                        fontSize: 14,
-                                        letterSpacing: 2,
-                                        color: const Color(0xFFD4622A))),
-                              ),
-                            ]),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+                color: Colors.transparent,
+                child: Container(
+                  width: 440,
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFF1A1814),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF2E2A22))),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: StatefulBuilder(
+                          builder: (context, setInner) =>
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                                Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        20, 18, 16, 0),
+                                    child: Row(children: [
+                                      Text('RECUPERAR SENHA',
+                                          style: GoogleFonts.bebasNeue(
+                                              fontSize: 18,
+                                              color: const Color(0xFFF0ECE4),
+                                              letterSpacing: 2)),
+                                      const Spacer(),
+                                      GestureDetector(
+                                          onTap: () => Navigator.pop(context),
+                                          child: Container(
+                                              width: 30,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                  color:
+                                                      const Color(0xFF242018),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                      color: const Color(
+                                                          0xFF2E2A22))),
+                                              child: const Icon(
+                                                  Icons.close_rounded,
+                                                  color: Color(0xFF7A7060),
+                                                  size: 15))),
+                                    ])),
+                                const SizedBox(height: 6),
+                                Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: Text(
+                                        'Enviaremos um link de redefinição para seu email',
+                                        style: GoogleFonts.familjenGrotesk(
+                                            fontSize: 12,
+                                            color: const Color(0xFF7A7060)))),
+                                const SizedBox(height: 16),
+                                const Divider(
+                                    color: Color(0xFF2E2A22), height: 1),
+                                const SizedBox(height: 16),
+                                if (!sent) ...[
+                                  Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20),
+                                      child: _InputField(
+                                          controller: emailController,
+                                          label: 'EMAIL',
+                                          hint: 'seu@email.com',
+                                          keyboardType:
+                                              TextInputType.emailAddress,
+                                          fontSize: 14)),
+                                  const SizedBox(height: 20),
+                                  Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 0, 20, 20),
+                                      child: SizedBox(
+                                          width: double.infinity,
+                                          height: 48,
+                                          child: ElevatedButton(
+                                            onPressed: loading
+                                                ? null
+                                                : () async {
+                                                    setInner(
+                                                        () => loading = true);
+                                                    try {
+                                                      await supabase.auth
+                                                          .resetPasswordForEmail(
+                                                              emailController
+                                                                  .text
+                                                                  .trim());
+                                                      setInner(() {
+                                                        sent = true;
+                                                        loading = false;
+                                                      });
+                                                    } catch (_) {
+                                                      setInner(() =>
+                                                          loading = false);
+                                                    }
+                                                  },
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    const Color(0xFFD4622A),
+                                                foregroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12)),
+                                                elevation: 0),
+                                            child: loading
+                                                ? const SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                            color: Colors.white,
+                                                            strokeWidth: 2))
+                                                : Text('ENVIAR LINK',
+                                                    style:
+                                                        GoogleFonts.bebasNeue(
+                                                            fontSize: 16,
+                                                            letterSpacing: 2)),
+                                          ))),
+                                ] else ...[
+                                  Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 8, 20, 24),
+                                      child: Column(children: [
+                                        const Text('✅',
+                                            style: TextStyle(fontSize: 48)),
+                                        const SizedBox(height: 16),
+                                        Text('Email enviado!',
+                                            style: GoogleFonts.bebasNeue(
+                                                fontSize: 22,
+                                                color: const Color(0xFF4CAF7A),
+                                                letterSpacing: 1)),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                            'Verifique sua caixa de entrada e siga as instruções.',
+                                            style: GoogleFonts.familjenGrotesk(
+                                                fontSize: 13,
+                                                color: const Color(0xFF7A7060),
+                                                height: 1.5),
+                                            textAlign: TextAlign.center),
+                                        const SizedBox(height: 20),
+                                        GestureDetector(
+                                            onTap: () => Navigator.pop(context),
+                                            child: Text('FECHAR',
+                                                style: GoogleFonts.bebasNeue(
+                                                    fontSize: 14,
+                                                    letterSpacing: 2,
+                                                    color: const Color(
+                                                        0xFFD4622A)))),
+                                      ])),
+                                ],
+                              ]))),
+                )));
+      }),
     );
+  }
+
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: GoogleFonts.familjenGrotesk(fontSize: 13)),
+      backgroundColor: const Color(0xFFD44A4A),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ));
   }
 
   String _friendlyError(String message) {
@@ -604,6 +561,10 @@ class _LoginScreenState extends State<LoginScreen> {
       return 'Este email já está cadastrado';
     if (message.contains('Password should be'))
       return 'A senha deve ter pelo menos 6 caracteres';
+    if (message.contains('Unsupported provider'))
+      return 'Este método de login não está configurado ainda';
+    if (message.contains('phone'))
+      return 'Login por telefone não disponível no momento';
     return message;
   }
 
@@ -631,7 +592,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final btnFontSize = isMobile ? 16.0 : 18.0;
     final btnHeight = isMobile ? 48.0 : 54.0;
     final verticalSpacing = isMobile ? 40.0 : screenHeight * 0.07;
-    final horizontalPadding = isMobile
+    final horizontalPad = isMobile
         ? 24.0
         : isTablet
             ? 48.0
@@ -642,8 +603,8 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding, vertical: 32),
+            padding:
+                EdgeInsets.symmetric(horizontal: horizontalPad, vertical: 32),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Padding(
@@ -653,7 +614,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     SizedBox(height: verticalSpacing * 0.5),
 
-                    // Logo
+                    // ── Logo ──
                     Text('INSTA',
                         style: GoogleFonts.bebasNeue(
                             fontSize: logoSize,
@@ -674,7 +635,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     SizedBox(height: verticalSpacing),
 
-                    // Toggle
+                    // ── Toggle Entrar / Cadastrar ──
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       _TabButton(
                           label: 'ENTRAR',
@@ -689,15 +650,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 24),
 
+                    // ── Campos ──
                     _InputField(
                         controller: _emailController,
                         label: 'EMAIL',
                         hint: 'seu@email.com',
                         keyboardType: TextInputType.emailAddress,
                         fontSize: inputFontSize),
-
                     const SizedBox(height: 14),
-
                     _InputField(
                       controller: _passwordController,
                       label: 'SENHA',
@@ -735,6 +695,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 24),
 
+                    // ── Botão principal ──
                     SizedBox(
                       width: double.infinity,
                       height: btnHeight,
@@ -753,10 +714,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                     color: Colors.white, strokeWidth: 2))
-                            : Text(
-                                _isLogin
-                                    ? 'ENTRAR NA GARAGEM'
-                                    : 'ABRIR MINHA GARAGEM',
+                            : Text(_isLogin ? 'ENTRAR' : 'ABRIR MINHA CONTA',
                                 style: GoogleFonts.bebasNeue(
                                     fontSize: btnFontSize, letterSpacing: 2)),
                       ),
@@ -764,23 +722,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 20),
 
-                    // Divisor OU
+                    // ── Divisor ──
                     Row(children: [
                       const Expanded(child: Divider(color: Color(0xFF2E2A22))),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('OU',
-                            style: GoogleFonts.jetBrainsMono(
-                                fontSize: 10,
-                                color: const Color(0xFF4A4438),
-                                letterSpacing: 2)),
-                      ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('OU',
+                              style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 10,
+                                  color: const Color(0xFF4A4438),
+                                  letterSpacing: 2))),
                       const Expanded(child: Divider(color: Color(0xFF2E2A22))),
                     ]),
 
                     const SizedBox(height: 20),
 
-                    // Botões sociais
+                    // ── Botões sociais: Google + Telefone ──
                     Row(children: [
                       // Google
                       Expanded(
@@ -801,32 +758,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: CircularProgressIndicator(
                                           color: Color(0xFFD4622A),
                                           strokeWidth: 2)))
-                              : Center(
-                                  child: SizedBox(
-                                      width: 26,
-                                      height: 26,
-                                      child: CustomPaint(
-                                          painter: _GoogleLogoPainter()))),
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                      SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CustomPaint(
+                                              painter: _GoogleLogoPainter())),
+                                      const SizedBox(width: 10),
+                                      Text('Google',
+                                          style: GoogleFonts.familjenGrotesk(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFFF0ECE4))),
+                                    ]),
                         ),
                       )),
-                      const SizedBox(width: 10),
 
-                      // Apple
-                      Expanded(
-                          child: GestureDetector(
-                        onTap: _signInWithApple,
-                        child: Container(
-                          height: btnHeight,
-                          decoration: BoxDecoration(
-                              color: const Color(0xFF1A1814),
-                              borderRadius: BorderRadius.circular(12),
-                              border:
-                                  Border.all(color: const Color(0xFF3A3428))),
-                          child: const Center(
-                              child: Icon(Icons.apple_rounded,
-                                  color: Color(0xFFF0ECE4), size: 28)),
-                        ),
-                      )),
                       const SizedBox(width: 10),
 
                       // Telefone
@@ -840,9 +789,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                               border:
                                   Border.all(color: const Color(0xFF3A3428))),
-                          child: const Center(
-                              child: Icon(Icons.phone_rounded,
-                                  color: Color(0xFFF0ECE4), size: 26)),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.phone_rounded,
+                                    color: Color(0xFFF0ECE4), size: 20),
+                                const SizedBox(width: 10),
+                                Text('Telefone',
+                                    style: GoogleFonts.familjenGrotesk(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFFF0ECE4))),
+                              ]),
                         ),
                       )),
                     ]),
@@ -870,7 +828,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// ── Google Logo ──
+// ── Google Logo Painter ──
 class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -886,9 +844,9 @@ class _GoogleLogoPainter extends CustomPainter {
     paint.color = const Color(0xFFEA4335);
     canvas.drawArc(rect, 0.53, 1.57, false, paint);
     paint.color = const Color(0xFFFBBC05);
-    canvas.drawArc(rect, 2.1, 1.05, false, paint);
+    canvas.drawArc(rect, 2.10, 1.05, false, paint);
     paint.color = const Color(0xFF34A853);
-    canvas.drawArc(rect, 3.15, 1.1, false, paint);
+    canvas.drawArc(rect, 3.15, 1.10, false, paint);
     canvas.drawLine(
         Offset(center.dx, center.dy),
         Offset(center.dx + radius * 0.72, center.dy),
@@ -942,15 +900,14 @@ class _InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final double fontSize;
   final Widget? suffix;
-  const _InputField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.fontSize,
-    this.obscureText = false,
-    this.keyboardType = TextInputType.text,
-    this.suffix,
-  });
+  const _InputField(
+      {required this.controller,
+      required this.label,
+      required this.hint,
+      required this.fontSize,
+      this.obscureText = false,
+      this.keyboardType = TextInputType.text,
+      this.suffix});
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
