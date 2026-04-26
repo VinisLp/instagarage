@@ -46,7 +46,6 @@ Widget _FilterBar({
   return Padding(
     padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
     child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      // Botão filtro
       GestureDetector(
         onTap: onFilterTap,
         child: Container(
@@ -90,7 +89,6 @@ Widget _FilterBar({
                     const Icon(Icons.close_rounded, color: _muted, size: 13))),
       ],
       const SizedBox(width: 8),
-      // Busca
       Expanded(
           child: Container(
         height: 38,
@@ -194,7 +192,7 @@ class _ExploreScreenState extends State<ExploreScreen>
 }
 
 // ════════════════════════════════════════
-// ABA ITENS — feed de posts quadrado
+// ABA ITENS
 // ════════════════════════════════════════
 class _ItemsTab extends StatefulWidget {
   final bool isDesktop;
@@ -395,8 +393,7 @@ class _ItemsTabState extends State<_ItemsTab> {
   @override
   Widget build(BuildContext context) {
     final posts = _filtered;
-    // Grid quadrado 1:1 — igual Instagram
-    final crossCount = widget.isDesktop ? 5 : 3;
+    final crossCount = widget.isDesktop ? 6 : 3;
     return Column(children: [
       _FilterBar(
           context: context,
@@ -422,8 +419,8 @@ class _ItemsTabState extends State<_ItemsTab> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossCount,
-                      crossAxisSpacing: 3,
-                      mainAxisSpacing: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
                       childAspectRatio: 1.0),
                   itemCount: posts.length,
                   itemBuilder: (ctx, i) => GestureDetector(
@@ -434,20 +431,28 @@ class _ItemsTabState extends State<_ItemsTab> {
   }
 }
 
-// Tile quadrado 1:1
 class _PostTile extends StatelessWidget {
   final _Post post;
   const _PostTile({required this.post});
   @override
-  Widget build(BuildContext context) => Stack(children: [
-        Container(
-            color: _card2,
-            child: Center(
-                child: Text(post.emoji,
-                    style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width >= 900
-                            ? 44
-                            : 32)))),
+  Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width >= 900;
+    return Container(
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _border, width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(children: [
+        // Fundo da imagem
+        Positioned.fill(
+            child: Container(
+                color: _card2,
+                child: Center(
+                    child: Text(post.emoji,
+                        style: TextStyle(fontSize: isDesktop ? 40 : 28))))),
+        // Badge VID
         if (post.isVideo)
           Positioned(
               top: 5,
@@ -466,18 +471,19 @@ class _PostTile extends StatelessWidget {
                         style: GoogleFonts.jetBrainsMono(
                             fontSize: 7, color: Colors.white))
                   ]))),
+        // Gradiente + info na base
         Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(6, 14, 6, 5),
+              padding: const EdgeInsets.fromLTRB(7, 18, 7, 6),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                    Colors.black.withOpacity(0.85),
+                    Colors.black.withOpacity(0.88),
                     Colors.transparent
                   ])),
               child: Column(
@@ -495,19 +501,19 @@ class _PostTile extends StatelessWidget {
                           style: GoogleFonts.familjenGrotesk(
                               fontSize: 8, color: Colors.white60)),
                       const Spacer(),
-                      const Icon(Icons.favorite,
-                          color: Colors.white70, size: 9),
+                      const Icon(Icons.favorite, color: _primary, size: 9),
                       const SizedBox(width: 2),
                       Text('${post.likes}',
                           style: GoogleFonts.jetBrainsMono(
-                              fontSize: 7, color: Colors.white60))
+                              fontSize: 7, color: Colors.white70))
                     ]),
                   ]),
             )),
-      ]);
+      ]),
+    );
+  }
 }
 
-// Dialog do post
 class _PostDialog extends StatefulWidget {
   final _Post post;
   const _PostDialog({required this.post});
@@ -527,7 +533,6 @@ class _PostDialogState extends State<_PostDialog> {
     return Container(
         color: _card,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          // Header
           Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
               child: Row(children: [
@@ -570,7 +575,6 @@ class _PostDialogState extends State<_PostDialog> {
                         color: _muted, size: 18)),
               ])),
           const SizedBox(height: 10),
-          // Mídia — altura fixa para não estourar o dialog
           SizedBox(
               height: 200,
               child: Stack(children: [
@@ -610,7 +614,6 @@ class _PostDialogState extends State<_PostDialog> {
                                     fontSize: 8, color: Colors.white))
                           ]))),
               ])),
-          // Ações
           Padding(
               padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
               child: Row(children: [
@@ -632,7 +635,6 @@ class _PostDialogState extends State<_PostDialog> {
                 const SizedBox(width: 14),
                 const Icon(Icons.share_outlined, color: _muted, size: 20),
               ])),
-          // Legenda com espaço abaixo
           Padding(
               padding: const EdgeInsets.fromLTRB(14, 2, 14, 14),
               child: RichText(
@@ -649,7 +651,6 @@ class _PostDialogState extends State<_PostDialog> {
                         fontSize: 12, color: const Color(0xFFB0A898))),
               ]))),
           const Divider(color: _border, height: 1),
-          // Comentários
           SizedBox(
               height: 110,
               child: ListView.builder(
@@ -682,7 +683,6 @@ class _PostDialogState extends State<_PostDialog> {
                                             fontSize: 12, color: _text)))),
                           ])))),
           const Divider(color: _border, height: 1),
-          // Input comentário
           Padding(
               padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Row(children: [
@@ -930,7 +930,8 @@ class _EventsTabState extends State<_EventsTab> {
   @override
   Widget build(BuildContext context) {
     final items = _filtered;
-    final crossCount = widget.isDesktop ? 3 : 2;
+    // mesmo grid dos itens
+    final crossCount = widget.isDesktop ? 6 : 3;
     return Column(children: [
       _FilterBar(
           context: context,
@@ -939,7 +940,24 @@ class _EventsTabState extends State<_EventsTab> {
           onFilterTap: _pickType,
           searchCtrl: _searchCtrl,
           onSearchChanged: () => setState(() {}),
-          onClearFilter: () => setState(() => _type = 'Todos')),
+          onClearFilter: () => setState(() => _type = 'Todos'),
+          extraRight: GestureDetector(
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const _CreateEventPage())),
+            child: Container(
+              height: 38,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                  color: _primary, borderRadius: BorderRadius.circular(10)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.add_rounded, color: Colors.white, size: 15),
+                const SizedBox(width: 5),
+                Text('CRIAR EVENTO',
+                    style: GoogleFonts.bebasNeue(
+                        fontSize: 13, letterSpacing: 1, color: Colors.white)),
+              ]),
+            ),
+          )),
       Expanded(
           child: items.isEmpty
               ? Center(
@@ -956,9 +974,9 @@ class _EventsTabState extends State<_EventsTab> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossCount,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: widget.isDesktop ? 1.6 : 1.3),
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: widget.isDesktop ? 0.72 : 0.75),
                   itemCount: items.length,
                   itemBuilder: (ctx, i) => GestureDetector(
                       onTap: () => Navigator.of(ctx).push(MaterialPageRoute(
@@ -968,6 +986,7 @@ class _EventsTabState extends State<_EventsTab> {
   }
 }
 
+// ── EventCard: capa grande, fonte maior, botão VER grande ──
 class _EventCard extends StatelessWidget {
   final _Event event;
   const _EventCard({required this.event});
@@ -980,91 +999,102 @@ class _EventCard extends StatelessWidget {
           color: _card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: _border)),
+      clipBehavior: Clip.antiAlias,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Stack(children: [
-          Container(
-              height: 56,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                  color: _card2,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(11))),
-              child: Center(
-                  child:
-                      Text(event.emoji, style: const TextStyle(fontSize: 26)))),
-          Positioned(
-              top: 6,
-              right: 6,
-              child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                      color: typeColor.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: typeColor)),
-                  child: Text(event.type,
-                      style: GoogleFonts.jetBrainsMono(
-                          fontSize: 8, color: typeColor)))),
-        ]),
+        // ── Capa grande — ocupa ~65% do card ──
         Expanded(
-            child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(event.title,
-                          style: GoogleFonts.bebasNeue(
-                              fontSize: 15, letterSpacing: 0.5, color: _text),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 5),
-                      Row(children: [
-                        const Icon(Icons.calendar_today_rounded,
-                            color: _primary, size: 11),
-                        const SizedBox(width: 4),
-                        Text(event.date,
-                            style: GoogleFonts.familjenGrotesk(
-                                fontSize: 12, color: _text))
-                      ]),
-                      const SizedBox(height: 3),
-                      Row(children: [
-                        const Icon(Icons.location_on_rounded,
-                            color: _muted, size: 11),
-                        const SizedBox(width: 4),
-                        Expanded(
-                            child: Text(event.location,
-                                style: GoogleFonts.familjenGrotesk(
-                                    fontSize: 11, color: _muted),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis))
-                      ]),
-                      const Spacer(),
-                      Row(children: [
-                        const Icon(Icons.people_rounded,
-                            color: _muted, size: 12),
-                        const SizedBox(width: 3),
-                        Text('${event.attendees}',
-                            style: GoogleFonts.familjenGrotesk(
-                                fontSize: 11, color: _muted)),
-                        const Spacer(),
-                        Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                                color: _primary,
-                                borderRadius: BorderRadius.circular(6)),
-                            child: Text('VER',
-                                style: GoogleFonts.bebasNeue(
-                                    fontSize: 13,
-                                    letterSpacing: 1,
-                                    color: Colors.white)))
-                      ]),
-                    ]))),
+          flex: 65,
+          child: Stack(children: [
+            Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [Color(0xFF1a0800), Color(0xFF3a1800)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight)),
+                child: Center(
+                    child: Text(event.emoji,
+                        style: const TextStyle(fontSize: 36)))),
+            Positioned(
+                top: 7,
+                right: 7,
+                child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                        color: typeColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: typeColor)),
+                    child: Text(event.type,
+                        style: GoogleFonts.jetBrainsMono(
+                            fontSize: 8, color: typeColor)))),
+          ]),
+        ),
+        // ── Info + botão — parte menor, texto e botão grandes ──
+        Expanded(
+          flex: 35,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(event.title,
+                  style: GoogleFonts.bebasNeue(
+                      fontSize: 17, letterSpacing: 0.5, color: _text),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 3),
+              Row(children: [
+                const Icon(Icons.calendar_today_rounded,
+                    color: _primary, size: 12),
+                const SizedBox(width: 4),
+                Text(event.date,
+                    style: GoogleFonts.familjenGrotesk(
+                        fontSize: 13,
+                        color: _text,
+                        fontWeight: FontWeight.w600))
+              ]),
+              const SizedBox(height: 2),
+              Row(children: [
+                const Icon(Icons.location_on_rounded, color: _muted, size: 12),
+                const SizedBox(width: 4),
+                Expanded(
+                    child: Text(event.location,
+                        style: GoogleFonts.familjenGrotesk(
+                            fontSize: 12, color: _muted),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis))
+              ]),
+              const Spacer(),
+              Row(children: [
+                const Icon(Icons.people_rounded, color: _muted, size: 13),
+                const SizedBox(width: 4),
+                Text('${event.attendees}',
+                    style: GoogleFonts.familjenGrotesk(
+                        fontSize: 12, color: _muted)),
+                const Spacer(),
+                Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 10),
+                    decoration: BoxDecoration(
+                        color: _primary,
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Text('VER',
+                        style: GoogleFonts.bebasNeue(
+                            fontSize: 18,
+                            letterSpacing: 2,
+                            color: Colors.white)))
+              ]),
+            ]),
+          ),
+        ),
       ]),
     );
   }
 }
 
+// ════════════════════════════════════════
+// PÁGINA DO EVENTO — AJUSTE 3: botões após "Ver todos"
+// ════════════════════════════════════════
 class _EventPage extends StatefulWidget {
   final _Event event;
   const _EventPage({required this.event});
@@ -1202,73 +1232,75 @@ class _EventPageState extends State<_EventPage> {
       backgroundColor: _bg,
       body: SafeArea(
           child: Column(children: [
-        Stack(children: [
-          Container(
-              height: 200,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Color(0xFF1a0800), Color(0xFF3a1800)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight)),
-              child: Center(
-                  child: Text(widget.event.emoji,
-                      style: const TextStyle(fontSize: 80)))),
-          Positioned(
-              top: 12,
-              left: 12,
-              child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.arrow_back_rounded,
-                          color: Colors.white, size: 20)))),
-          Positioned(
-              top: 12,
-              right: 12,
-              child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                      color: typeColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: typeColor)),
-                  child: Text(widget.event.type,
-                      style: GoogleFonts.jetBrainsMono(
-                          fontSize: 10, color: typeColor)))),
-        ]),
+        // ── Header compacto — sem banner ──
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: _border))),
+          child: Row(children: [
+            GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                        color: _card2,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: _border)),
+                    child: const Icon(Icons.arrow_back_rounded,
+                        color: _text, size: 18))),
+            const SizedBox(width: 12),
+            Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _card2,
+                    border: Border.all(color: _border)),
+                child: Center(
+                    child: Text(widget.event.emoji,
+                        style: const TextStyle(fontSize: 22)))),
+            const SizedBox(width: 12),
+            Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text(widget.event.title,
+                      style: GoogleFonts.bebasNeue(
+                          fontSize: 22, color: _text, letterSpacing: 1),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  Text('por ${widget.event.organizer}',
+                      style: GoogleFonts.familjenGrotesk(
+                          fontSize: 12,
+                          color: _primary,
+                          fontWeight: FontWeight.w600)),
+                ])),
+            const SizedBox(width: 8),
+            Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                    color: typeColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: typeColor)),
+                child: Text(widget.event.type,
+                    style: GoogleFonts.jetBrainsMono(
+                        fontSize: 10, color: typeColor))),
+          ]),
+        ),
         Expanded(child: LayoutBuilder(builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= 700;
-          // Sidebar esquerda com info + participantes, área direita scrollável com detalhes
           return isDesktop
               ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  // Sidebar esquerda — textos grandes + botões verticais
+                  // ── Sidebar esquerda — info, participantes e DEPOIS os botões ──
                   SizedBox(
                       width: 300,
                       child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(widget.event.title,
-                                    style: GoogleFonts.bebasNeue(
-                                        fontSize: 26,
-                                        letterSpacing: 1.5,
-                                        color: _text)),
-                                const SizedBox(height: 6),
-                                Row(children: [
-                                  Text(widget.event.oEmoji,
-                                      style: const TextStyle(fontSize: 15)),
-                                  const SizedBox(width: 6),
-                                  Text('por ${widget.event.organizer}',
-                                      style: GoogleFonts.familjenGrotesk(
-                                          fontSize: 14, color: _primary))
-                                ]),
-                                const SizedBox(height: 16),
                                 _ICard(
                                     icon: Icons.calendar_today_rounded,
                                     label: 'DATA',
@@ -1293,7 +1325,7 @@ class _EventPageState extends State<_EventPage> {
                                     label: 'CATEGORIA',
                                     value: widget.event.cat,
                                     color: _muted),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 14),
                                 Text('SOBRE',
                                     style: GoogleFonts.jetBrainsMono(
                                         fontSize: 10,
@@ -1301,81 +1333,18 @@ class _EventPageState extends State<_EventPage> {
                                         letterSpacing: 1.5)),
                                 const SizedBox(height: 8),
                                 Container(
-                                    padding: const EdgeInsets.all(14),
+                                    padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                         color: _card,
                                         borderRadius: BorderRadius.circular(10),
                                         border: Border.all(color: _border)),
                                     child: Text(widget.event.desc,
                                         style: GoogleFonts.familjenGrotesk(
-                                            fontSize: 13,
+                                            fontSize: 12,
                                             color: const Color(0xFFB0A898),
                                             height: 1.5))),
-                                const SizedBox(height: 16),
-                                // Botões verticais
-                                SizedBox(
-                                    width: double.infinity,
-                                    height: 48,
-                                    child: ElevatedButton(
-                                      onPressed: () => setState(
-                                          () => _attending = !_attending),
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor: _attending
-                                              ? _green.withOpacity(0.12)
-                                              : _primary,
-                                          foregroundColor: _attending
-                                              ? _green
-                                              : Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              side: _attending
-                                                  ? const BorderSide(
-                                                      color: _green)
-                                                  : BorderSide.none),
-                                          elevation: 0),
-                                      child: Text(
-                                          _attending
-                                              ? '✓ CONFIRMADO'
-                                              : 'PARTICIPAR',
-                                          style: GoogleFonts.bebasNeue(
-                                              fontSize: 15, letterSpacing: 2)),
-                                    )),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                    width: double.infinity,
-                                    height: 48,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                                content: Text(
-                                                    'Link copiado! 🔗',
-                                                    style: GoogleFonts
-                                                        .familjenGrotesk(
-                                                            fontSize: 13)),
-                                                backgroundColor: _green,
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10))));
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor: _card,
-                                          foregroundColor: _text,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              side: const BorderSide(
-                                                  color: _border2)),
-                                          elevation: 0),
-                                      child: Text('CONVIDAR',
-                                          style: GoogleFonts.bebasNeue(
-                                              fontSize: 15, letterSpacing: 2)),
-                                    )),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 14),
+                                // Participantes
                                 GestureDetector(
                                   onTap: () => _showParticipants(context),
                                   child: Row(children: [
@@ -1402,7 +1371,7 @@ class _EventPageState extends State<_EventPage> {
                                         color: _muted, size: 12),
                                   ]),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 8),
                                 Wrap(
                                     spacing: 8,
                                     runSpacing: 8,
@@ -1444,7 +1413,71 @@ class _EventPageState extends State<_EventPage> {
                                                           .underline,
                                                       decorationColor:
                                                           _primary)))),
-                                const SizedBox(height: 20),
+                                // Botões após participantes
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                    width: double.infinity,
+                                    height: 44,
+                                    child: ElevatedButton(
+                                      onPressed: () => setState(
+                                          () => _attending = !_attending),
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: _attending
+                                              ? _green.withOpacity(0.12)
+                                              : _primary,
+                                          foregroundColor: _attending
+                                              ? _green
+                                              : Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              side: _attending
+                                                  ? const BorderSide(
+                                                      color: _green)
+                                                  : BorderSide.none),
+                                          elevation: 0),
+                                      child: Text(
+                                          _attending
+                                              ? '✓ CONFIRMADO'
+                                              : 'PARTICIPAR',
+                                          style: GoogleFonts.bebasNeue(
+                                              fontSize: 15, letterSpacing: 2)),
+                                    )),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                    width: double.infinity,
+                                    height: 44,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Link copiado! 🔗',
+                                                    style: GoogleFonts
+                                                        .familjenGrotesk(
+                                                            fontSize: 13)),
+                                                backgroundColor: _green,
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10))));
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: _card2,
+                                          foregroundColor: _text,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              side: const BorderSide(
+                                                  color: _border2)),
+                                          elevation: 0),
+                                      child: Text('CONVIDAR',
+                                          style: GoogleFonts.bebasNeue(
+                                              fontSize: 15, letterSpacing: 2)),
+                                    )),
+                                const SizedBox(height: 16),
                               ]))),
                   const VerticalDivider(width: 1, color: _border),
                   Expanded(
@@ -1836,7 +1869,7 @@ class _CommunitiesTabState extends State<_CommunitiesTab> {
   @override
   Widget build(BuildContext context) {
     final items = _filtered;
-    final crossCount = widget.isDesktop ? 3 : 2;
+    final crossCount = widget.isDesktop ? 4 : 2;
     return Column(children: [
       _FilterBar(
           context: context,
@@ -1845,7 +1878,24 @@ class _CommunitiesTabState extends State<_CommunitiesTab> {
           onFilterTap: _pickCat,
           searchCtrl: _searchCtrl,
           onSearchChanged: () => setState(() {}),
-          onClearFilter: () => setState(() => _cat = 'Todas')),
+          onClearFilter: () => setState(() => _cat = 'Todas'),
+          extraRight: GestureDetector(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const _CreateCommunityPage())),
+            child: Container(
+              height: 38,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                  color: _primary, borderRadius: BorderRadius.circular(10)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.add_rounded, color: Colors.white, size: 15),
+                const SizedBox(width: 5),
+                Text('CRIAR COMUNIDADE',
+                    style: GoogleFonts.bebasNeue(
+                        fontSize: 13, letterSpacing: 1, color: Colors.white)),
+              ]),
+            ),
+          )),
       Expanded(
           child: items.isEmpty
               ? Center(
@@ -1861,10 +1911,10 @@ class _CommunitiesTabState extends State<_CommunitiesTab> {
               : GridView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossCount,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: widget.isDesktop ? 1.4 : 1.15),
+                      crossAxisCount: widget.isDesktop ? 6 : 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: widget.isDesktop ? 0.85 : 1.1),
                   itemCount: items.length,
                   itemBuilder: (ctx, i) => GestureDetector(
                       onTap: () => Navigator.of(ctx).push(MaterialPageRoute(
@@ -1884,54 +1934,69 @@ class _CommCard extends StatelessWidget {
             color: _card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: _border)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-              height: 58,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                  color: _card2,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(11))),
-              child: Center(
-                  child:
-                      Text(comm.emoji, style: const TextStyle(fontSize: 28)))),
-          Expanded(
-              child: Padding(
-                  padding: const EdgeInsets.all(10),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(11)),
+                child: Container(
+                    height: 130,
+                    width: double.infinity,
+                    color: _card2,
+                    child: Center(
+                        child: Text(comm.emoji,
+                            style: const TextStyle(fontSize: 56)))),
+              ),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(comm.name,
                             style: GoogleFonts.familjenGrotesk(
-                                fontSize: 11,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: _text),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 2),
+                        Text('${_fmt(comm.members)} membros',
+                            style: GoogleFonts.familjenGrotesk(
+                                fontSize: 10, color: _muted)),
+                        const SizedBox(height: 6),
+                        Text(comm.desc,
+                            style: GoogleFonts.familjenGrotesk(
+                                fontSize: 11,
+                                color: const Color(0xFF9A8E80),
+                                height: 1.4),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 3),
-                        Text(
-                            '${_fmt(comm.members)} membros · ${comm.posts} posts hoje',
-                            style: GoogleFonts.familjenGrotesk(
-                                fontSize: 9, color: _muted)),
-                        const Spacer(),
-                        Container(
+                        const SizedBox(height: 16),
+                        SizedBox(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 7),
-                            decoration: BoxDecoration(
-                                color: _primary,
-                                borderRadius: BorderRadius.circular(7)),
-                            child: Center(
+                            child: ElevatedButton(
+                                onPressed: null,
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: _primary,
+                                    disabledBackgroundColor: _primary,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8)),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    elevation: 0),
                                 child: Text('VER',
                                     style: GoogleFonts.bebasNeue(
-                                        fontSize: 12,
-                                        letterSpacing: 1.5,
+                                        fontSize: 14,
+                                        letterSpacing: 2,
                                         color: Colors.white)))),
-                      ]))),
-        ]),
+                      ])),
+            ]),
       );
 }
 
-// Página da comunidade com layout lateral desktop
 class _CommPage extends StatefulWidget {
   final _Comm comm;
   const _CommPage({required this.comm});
@@ -2249,21 +2314,20 @@ class _CommPageState extends State<_CommPage>
           AspectRatio(
               aspectRatio: 1,
               child: Container(
-                decoration: const BoxDecoration(color: _card2),
-                child: Center(
-                    child: Stack(alignment: Alignment.center, children: [
-                  Text(p['content'], style: const TextStyle(fontSize: 60)),
-                  if (p['type'] == 'video')
-                    Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle),
-                        child: const Icon(Icons.play_arrow_rounded,
-                            color: Colors.white, size: 26)),
-                ])),
-              )),
+                  decoration: const BoxDecoration(color: _card2),
+                  child: Center(
+                      child: Stack(alignment: Alignment.center, children: [
+                    Text(p['content'], style: const TextStyle(fontSize: 60)),
+                    if (p['type'] == 'video')
+                      Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle),
+                          child: const Icon(Icons.play_arrow_rounded,
+                              color: Colors.white, size: 26)),
+                  ])))),
         if (p['text'].isNotEmpty)
           Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
@@ -2290,72 +2354,318 @@ class _CommPageState extends State<_CommPage>
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 900;
     return Scaffold(
-      backgroundColor: _bg,
-      body: SafeArea(
-          child: Column(children: [
-        // Banner
-        Stack(children: [
+        backgroundColor: _bg,
+        body: SafeArea(
+            child: Column(children: [
           Container(
-              height: 140,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                Color(0xFF1a0800),
-                Color(0xFF3a1800),
-                Color(0xFF6a2800)
-              ], begin: Alignment.topLeft, end: Alignment.bottomRight)),
-              child: Center(
-                  child: Text(widget.comm.emoji,
-                      style: const TextStyle(fontSize: 56)))),
-          Positioned(
-              top: 12,
-              left: 12,
-              child: GestureDetector(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: _border))),
+            child: Row(children: [
+              GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(10)),
+                          color: _card2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _border)),
                       child: const Icon(Icons.arrow_back_rounded,
-                          color: Colors.white, size: 18)))),
-        ]),
-        // Info header
-        Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(widget.comm.name,
-                  style: GoogleFonts.bebasNeue(
-                      fontSize: 22, color: _text, letterSpacing: 1)),
-              Text(
-                  '${_fmt(widget.comm.members)} membros · ${widget.comm.posts} posts hoje',
-                  style:
-                      GoogleFonts.familjenGrotesk(fontSize: 12, color: _muted)),
-            ])),
-        const SizedBox(height: 8),
-        // Layout
-        Expanded(
-            child: isDesktop
-                // Desktop: lateral esquerda info/membros + direita posts
-                ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    // Sidebar esquerda — textos maiores + botões verticais
-                    SizedBox(
-                        width: 300,
-                        child: SingleChildScrollView(
+                          color: _text, size: 18))),
+              const SizedBox(width: 12),
+              Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _card2,
+                      border: Border.all(color: _border)),
+                  child: Center(
+                      child: Text(widget.comm.emoji,
+                          style: const TextStyle(fontSize: 22)))),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Text(widget.comm.name,
+                        style: GoogleFonts.bebasNeue(
+                            fontSize: 22, color: _text, letterSpacing: 1),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    Text(
+                        '${_fmt(widget.comm.members)} membros · ${widget.comm.posts} posts hoje',
+                        style: GoogleFonts.familjenGrotesk(
+                            fontSize: 12, color: _muted)),
+                  ])),
+            ]),
+          ),
+          const SizedBox(height: 0),
+          Expanded(
+              child: isDesktop
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                          SizedBox(
+                              width: 300,
+                              child: SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text('SOBRE',
+                                            style: GoogleFonts.jetBrainsMono(
+                                                fontSize: 10,
+                                                color: _muted,
+                                                letterSpacing: 1.5)),
+                                        const SizedBox(height: 8),
+                                        Container(
+                                            padding: const EdgeInsets.all(14),
+                                            decoration: BoxDecoration(
+                                                color: _card,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                border:
+                                                    Border.all(color: _border)),
+                                            child: Text(widget.comm.desc,
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 13,
+                                                        color: const Color(
+                                                            0xFFB0A898),
+                                                        height: 1.5))),
+                                        const SizedBox(height: 14),
+                                        Text('TAGS',
+                                            style: GoogleFonts.jetBrainsMono(
+                                                fontSize: 10,
+                                                color: _muted,
+                                                letterSpacing: 1.5)),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                            spacing: 6,
+                                            runSpacing: 6,
+                                            children: widget.comm.tags
+                                                .map((t) => Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                        color: _primary
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                5),
+                                                        border: Border.all(
+                                                            color: _primary.withOpacity(
+                                                                0.3))),
+                                                    child: Text('#$t',
+                                                        style: GoogleFonts.jetBrainsMono(
+                                                            fontSize: 10,
+                                                            color: _primary))))
+                                                .toList()),
+                                        const SizedBox(height: 16),
+                                        // Membros primeiro
+                                        GestureDetector(
+                                            onTap: () => _showMembers(context),
+                                            child: Row(children: [
+                                              Text(
+                                                  'MEMBROS (${_members.length})',
+                                                  style:
+                                                      GoogleFonts.jetBrainsMono(
+                                                          fontSize: 10,
+                                                          color: _muted,
+                                                          letterSpacing: 1.5)),
+                                              const Spacer(),
+                                              const Icon(
+                                                  Icons
+                                                      .arrow_forward_ios_rounded,
+                                                  color: _muted,
+                                                  size: 12),
+                                            ])),
+                                        const SizedBox(height: 8),
+                                        ..._members.take(4).map((m) => GestureDetector(
+                                            onTap: () => _showMembers(context),
+                                            child: Container(
+                                                margin: const EdgeInsets.only(
+                                                    bottom: 6),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 9),
+                                                decoration: BoxDecoration(
+                                                    color: _card,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    border: Border.all(
+                                                        color: _border)),
+                                                child: Text(m,
+                                                    style:
+                                                        GoogleFonts.familjenGrotesk(
+                                                            fontSize: 13,
+                                                            color: _text))))),
+                                        if (_members.length > 4)
+                                          GestureDetector(
+                                              onTap: () =>
+                                                  _showMembers(context),
+                                              child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 6),
+                                                  child: Text('Ver todos →',
+                                                      style: GoogleFonts
+                                                          .familjenGrotesk(
+                                                              fontSize: 13,
+                                                              color: _primary,
+                                                              decoration:
+                                                                  TextDecoration
+                                                                      .underline,
+                                                              decorationColor:
+                                                                  _primary)))),
+                                        // Botões APÓS Ver todos
+                                        const SizedBox(height: 16),
+                                        SizedBox(
+                                            width: double.infinity,
+                                            height: 44,
+                                            child: ElevatedButton(
+                                              onPressed: () => setState(
+                                                  () => _joined = !_joined),
+                                              style: ElevatedButton.styleFrom(
+                                                  backgroundColor: _joined
+                                                      ? Colors.transparent
+                                                      : _primary,
+                                                  foregroundColor: _joined
+                                                      ? _muted
+                                                      : Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      side: _joined
+                                                          ? const BorderSide(
+                                                              color: _border2)
+                                                          : BorderSide.none),
+                                                  elevation: 0),
+                                              child: Text(
+                                                  _joined
+                                                      ? 'PARTICIPANDO'
+                                                      : 'PARTICIPAR',
+                                                  style: GoogleFonts.bebasNeue(
+                                                      fontSize: 15,
+                                                      letterSpacing: 2)),
+                                            )),
+                                        const SizedBox(height: 8),
+                                        SizedBox(
+                                            width: double.infinity,
+                                            height: 44,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                        content: Text(
+                                                            'Link da comunidade copiado! 🔗',
+                                                            style: GoogleFonts
+                                                                .familjenGrotesk(
+                                                                    fontSize:
+                                                                        13)),
+                                                        backgroundColor: _green,
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10))));
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                  backgroundColor: _card2,
+                                                  foregroundColor: _text,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      side: const BorderSide(
+                                                          color: _border2)),
+                                                  elevation: 0),
+                                              child: Text('CONVIDAR',
+                                                  style: GoogleFonts.bebasNeue(
+                                                      fontSize: 15,
+                                                      letterSpacing: 2)),
+                                            )),
+                                        const SizedBox(height: 16),
+                                      ]))),
+                          const VerticalDivider(width: 1, color: _border),
+                          Expanded(
+                              child: Column(children: [
+                            _buildPostInput(),
+                            Expanded(
+                                child: ListView.builder(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 12, 16, 16),
+                                    itemCount: _posts.length,
+                                    itemBuilder: (_, i) =>
+                                        _buildPostCard(_posts[i]))),
+                          ])),
+                        ])
+                  : Column(children: [
+                      TabBar(
+                          controller: _tab,
+                          dividerColor: Colors.transparent,
+                          indicatorColor: _primary,
+                          indicatorWeight: 2,
+                          labelColor: _primary,
+                          unselectedLabelColor: _muted,
+                          labelStyle: GoogleFonts.bebasNeue(
+                              fontSize: 12, letterSpacing: 1.5),
+                          unselectedLabelStyle: GoogleFonts.bebasNeue(
+                              fontSize: 12, letterSpacing: 1.5),
+                          tabs: const [
+                            Tab(text: 'POSTS'),
+                            Tab(text: 'MEMBROS'),
+                            Tab(text: 'SOBRE')
+                          ]),
+                      Expanded(
+                          child: TabBarView(controller: _tab, children: [
+                        Column(children: [
+                          _buildPostInput(),
+                          Expanded(
+                              child: ListView.builder(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                                  itemCount: _posts.length,
+                                  itemBuilder: (_, i) =>
+                                      _buildPostCard(_posts[i])))
+                        ]),
+                        ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _members.length,
+                            itemBuilder: (_, i) => Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                decoration: BoxDecoration(
+                                    color: _card,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: _border)),
+                                child: Text(_members[i],
+                                    style: GoogleFonts.familjenGrotesk(
+                                        fontSize: 12, color: _text)))),
+                        SingleChildScrollView(
                             padding: const EdgeInsets.all(16),
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('SOBRE',
                                       style: GoogleFonts.jetBrainsMono(
-                                          fontSize: 10,
+                                          fontSize: 9,
                                           color: _muted,
                                           letterSpacing: 1.5)),
                                   const SizedBox(height: 8),
                                   Container(
-                                      padding: const EdgeInsets.all(14),
+                                      padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
                                           color: _card,
                                           borderRadius:
@@ -2363,13 +2673,13 @@ class _CommPageState extends State<_CommPage>
                                           border: Border.all(color: _border)),
                                       child: Text(widget.comm.desc,
                                           style: GoogleFonts.familjenGrotesk(
-                                              fontSize: 13,
+                                              fontSize: 12,
                                               color: const Color(0xFFB0A898),
                                               height: 1.5))),
-                                  const SizedBox(height: 14),
+                                  const SizedBox(height: 12),
                                   Text('TAGS',
                                       style: GoogleFonts.jetBrainsMono(
-                                          fontSize: 10,
+                                          fontSize: 9,
                                           color: _muted,
                                           letterSpacing: 1.5)),
                                   const SizedBox(height: 8),
@@ -2381,7 +2691,7 @@ class _CommPageState extends State<_CommPage>
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 8,
-                                                      vertical: 4),
+                                                      vertical: 3),
                                               decoration: BoxDecoration(
                                                   color:
                                                       _primary.withOpacity(0.1),
@@ -2393,243 +2703,13 @@ class _CommPageState extends State<_CommPage>
                                               child: Text('#$t',
                                                   style:
                                                       GoogleFonts.jetBrainsMono(
-                                                          fontSize: 10,
+                                                          fontSize: 9,
                                                           color: _primary))))
                                           .toList()),
-                                  const SizedBox(height: 16),
-                                  // Botões verticais
-                                  SizedBox(
-                                      width: double.infinity,
-                                      height: 48,
-                                      child: ElevatedButton(
-                                        onPressed: () =>
-                                            setState(() => _joined = !_joined),
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: _joined
-                                                ? Colors.transparent
-                                                : _primary,
-                                            foregroundColor:
-                                                _joined ? _muted : Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                side: _joined
-                                                    ? const BorderSide(
-                                                        color: _border2)
-                                                    : BorderSide.none),
-                                            elevation: 0),
-                                        child: Text(
-                                            _joined
-                                                ? 'PARTICIPANDO'
-                                                : 'PARTICIPAR',
-                                            style: GoogleFonts.bebasNeue(
-                                                fontSize: 15,
-                                                letterSpacing: 2)),
-                                      )),
-                                  const SizedBox(height: 8),
-                                  SizedBox(
-                                      width: double.infinity,
-                                      height: 48,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                                  content: Text(
-                                                      'Link da comunidade copiado! 🔗',
-                                                      style: GoogleFonts
-                                                          .familjenGrotesk(
-                                                              fontSize: 13)),
-                                                  backgroundColor: _green,
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10))));
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: _card2,
-                                            foregroundColor: _text,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                side: const BorderSide(
-                                                    color: _border2)),
-                                            elevation: 0),
-                                        child: Text('CONVIDAR',
-                                            style: GoogleFonts.bebasNeue(
-                                                fontSize: 15,
-                                                letterSpacing: 2)),
-                                      )),
-                                  const SizedBox(height: 16),
-                                  // Membros clicáveis com busca
-                                  GestureDetector(
-                                    onTap: () => _showMembers(context),
-                                    child: Row(children: [
-                                      Text('MEMBROS (${_members.length})',
-                                          style: GoogleFonts.jetBrainsMono(
-                                              fontSize: 10,
-                                              color: _muted,
-                                              letterSpacing: 1.5)),
-                                      const Spacer(),
-                                      const Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          color: _muted,
-                                          size: 12),
-                                    ]),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  ..._members.take(4).map((m) =>
-                                      GestureDetector(
-                                          onTap: () => _showMembers(context),
-                                          child: Container(
-                                              margin: const EdgeInsets.only(
-                                                  bottom: 6),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 9),
-                                              decoration: BoxDecoration(
-                                                  color: _card,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  border: Border.all(
-                                                      color: _border)),
-                                              child: Text(m,
-                                                  style: GoogleFonts
-                                                      .familjenGrotesk(
-                                                          fontSize: 13,
-                                                          color: _text))))),
-                                  if (_members.length > 4)
-                                    GestureDetector(
-                                        onTap: () => _showMembers(context),
-                                        child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 6),
-                                            child: Text('Ver todos →',
-                                                style:
-                                                    GoogleFonts.familjenGrotesk(
-                                                        fontSize: 13,
-                                                        color: _primary,
-                                                        decoration:
-                                                            TextDecoration
-                                                                .underline,
-                                                        decorationColor:
-                                                            _primary)))),
-                                ]))),
-                    const VerticalDivider(width: 1, color: _border),
-                    // Posts
-                    Expanded(
-                        child: Column(children: [
-                      _buildPostInput(),
-                      Expanded(
-                          child: ListView.builder(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                              itemCount: _posts.length,
-                              itemBuilder: (_, i) =>
-                                  _buildPostCard(_posts[i]))),
+                                ])),
+                      ])),
                     ])),
-                  ])
-                // Mobile: abas
-                : Column(children: [
-                    TabBar(
-                        controller: _tab,
-                        dividerColor: Colors.transparent,
-                        indicatorColor: _primary,
-                        indicatorWeight: 2,
-                        labelColor: _primary,
-                        unselectedLabelColor: _muted,
-                        labelStyle: GoogleFonts.bebasNeue(
-                            fontSize: 12, letterSpacing: 1.5),
-                        unselectedLabelStyle: GoogleFonts.bebasNeue(
-                            fontSize: 12, letterSpacing: 1.5),
-                        tabs: const [
-                          Tab(text: 'POSTS'),
-                          Tab(text: 'MEMBROS'),
-                          Tab(text: 'SOBRE')
-                        ]),
-                    Expanded(
-                        child: TabBarView(controller: _tab, children: [
-                      Column(children: [
-                        _buildPostInput(),
-                        Expanded(
-                            child: ListView.builder(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                                itemCount: _posts.length,
-                                itemBuilder: (_, i) =>
-                                    _buildPostCard(_posts[i])))
-                      ]),
-                      ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _members.length,
-                          itemBuilder: (_, i) => Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                  color: _card,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: _border)),
-                              child: Text(_members[i],
-                                  style: GoogleFonts.familjenGrotesk(
-                                      fontSize: 12, color: _text)))),
-                      SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('SOBRE',
-                                    style: GoogleFonts.jetBrainsMono(
-                                        fontSize: 9,
-                                        color: _muted,
-                                        letterSpacing: 1.5)),
-                                const SizedBox(height: 8),
-                                Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                        color: _card,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: _border)),
-                                    child: Text(widget.comm.desc,
-                                        style: GoogleFonts.familjenGrotesk(
-                                            fontSize: 12,
-                                            color: const Color(0xFFB0A898),
-                                            height: 1.5))),
-                                const SizedBox(height: 12),
-                                Text('TAGS',
-                                    style: GoogleFonts.jetBrainsMono(
-                                        fontSize: 9,
-                                        color: _muted,
-                                        letterSpacing: 1.5)),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                    spacing: 6,
-                                    runSpacing: 6,
-                                    children: widget.comm.tags
-                                        .map((t) => Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 3),
-                                            decoration: BoxDecoration(
-                                                color:
-                                                    _primary.withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                border: Border.all(
-                                                    color: _primary
-                                                        .withOpacity(0.3))),
-                                            child: Text('#$t',
-                                                style:
-                                                    GoogleFonts.jetBrainsMono(
-                                                        fontSize: 9,
-                                                        color: _primary))))
-                                        .toList()),
-                              ])),
-                    ])),
-                  ])),
-      ])),
-    );
+        ])));
   }
 }
 
@@ -2804,7 +2884,7 @@ class _ProfilesTabState extends State<_ProfilesTab> {
   @override
   Widget build(BuildContext context) {
     final items = _filtered;
-    final crossCount = widget.isDesktop ? 4 : 2;
+    final crossCount = widget.isDesktop ? 6 : 3;
     return Column(children: [
       _FilterBar(
           context: context,
@@ -2830,9 +2910,9 @@ class _ProfilesTabState extends State<_ProfilesTab> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossCount,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: widget.isDesktop ? 0.9 : 0.78),
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: widget.isDesktop ? 0.95 : 0.85),
                   itemCount: items.length,
                   itemBuilder: (ctx, i) {
                     final p = items[i];
@@ -2845,107 +2925,83 @@ class _ProfilesTabState extends State<_ProfilesTab> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: _border)),
                           child: Column(children: [
-                            // Banner pequeno com avatar
-                            Container(
-                                height: 56,
+                            // Avatar centralizado sem banner
+                            Expanded(
+                              flex: 55,
+                              child: Container(
                                 width: double.infinity,
-                                decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF1a0800),
-                                          Color(0xFF3a1800)
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight),
-                                    borderRadius: const BorderRadius.vertical(
+                                decoration: const BoxDecoration(
+                                    color: _card2,
+                                    borderRadius: BorderRadius.vertical(
                                         top: Radius.circular(11))),
                                 child: Center(
                                     child: Container(
-                                        width: 44,
-                                        height: 44,
+                                        width: 56,
+                                        height: 56,
                                         decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: _card2,
+                                            color: _card,
                                             border: Border.all(
                                                 color: _primary, width: 2)),
                                         child: Center(
                                             child: Text(p.emoji,
                                                 style: const TextStyle(
-                                                    fontSize: 22)))))),
-                            // Info preenchendo o card
+                                                    fontSize: 28))))),
+                              ),
+                            ),
+                            // Info legível
                             Expanded(
-                                child: Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                    child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text(p.name,
-                                              style:
-                                                  GoogleFonts.familjenGrotesk(
-                                                      fontSize: 13,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: _text),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              textAlign: TextAlign.center),
-                                          Text(p.handle,
-                                              style:
-                                                  GoogleFonts.familjenGrotesk(
-                                                      fontSize: 11,
-                                                      color: _muted),
-                                              textAlign: TextAlign.center),
-                                          Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text('${p.pieces}',
-                                                    style:
-                                                        GoogleFonts.bebasNeue(
-                                                            fontSize: 16,
-                                                            color: _primary)),
-                                                Text(' pç',
-                                                    style: GoogleFonts
-                                                        .familjenGrotesk(
-                                                            fontSize: 10,
-                                                            color: _muted)),
-                                                const SizedBox(width: 8),
-                                                Container(
-                                                    width: 1,
-                                                    height: 14,
-                                                    color: _border),
-                                                const SizedBox(width: 8),
-                                                Text(_fmt(p.followers),
-                                                    style:
-                                                        GoogleFonts.bebasNeue(
-                                                            fontSize: 16,
-                                                            color: _text)),
-                                                Text(' seg',
-                                                    style: GoogleFonts
-                                                        .familjenGrotesk(
-                                                            fontSize: 10,
-                                                            color: _muted)),
-                                              ]),
-                                          Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4),
-                                              decoration: BoxDecoration(
-                                                  color: _card2,
-                                                  borderRadius:
-                                                      BorderRadius.circular(5)),
-                                              child: Text(p.cat,
-                                                  style:
-                                                      GoogleFonts.jetBrainsMono(
-                                                          fontSize: 10,
-                                                          color: _muted),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  textAlign: TextAlign.center)),
-                                        ]))),
+                              flex: 45,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Text(p.name,
+                                          style: GoogleFonts.familjenGrotesk(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: _text),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center),
+                                      Text(p.handle,
+                                          style: GoogleFonts.familjenGrotesk(
+                                              fontSize: 10, color: _muted),
+                                          textAlign: TextAlign.center),
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text('${p.pieces}',
+                                                style: GoogleFonts.bebasNeue(
+                                                    fontSize: 15,
+                                                    color: _primary)),
+                                            Text(' pç',
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 9,
+                                                        color: _muted)),
+                                            const SizedBox(width: 8),
+                                            Container(
+                                                width: 1,
+                                                height: 12,
+                                                color: _border),
+                                            const SizedBox(width: 8),
+                                            Text(_fmt(p.followers),
+                                                style: GoogleFonts.bebasNeue(
+                                                    fontSize: 15,
+                                                    color: _text)),
+                                            Text(' seg',
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 9,
+                                                        color: _muted)),
+                                          ]),
+                                    ]),
+                              ),
+                            ),
                           ]),
                         ));
                   })),
@@ -2953,7 +3009,6 @@ class _ProfilesTabState extends State<_ProfilesTab> {
   }
 }
 
-// Dialog preview do perfil
 class _ProfileDialog extends StatefulWidget {
   final _Profile profile;
   const _ProfileDialog({required this.profile});
@@ -2961,73 +3016,85 @@ class _ProfileDialog extends StatefulWidget {
   State<_ProfileDialog> createState() => _ProfileDialogState();
 }
 
-class _ProfileDialogState extends State<_ProfileDialog> {
+class _ProfileDialogState extends State<_ProfileDialog>
+    with SingleTickerProviderStateMixin {
   bool _following = false;
+  late TabController _tab;
   String _fmt(int n) => n >= 1000 ? '${(n / 1000).toStringAsFixed(1)}k' : '$n';
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.profile;
     return Container(
-        color: _card,
-        child: SingleChildScrollView(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-          // Banner SEM avatar
-          Stack(children: [
-            Container(
-                height: 90,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                  Color(0xFF1a0800),
-                  Color(0xFF3a1800),
-                  Color(0xFF6a2800)
-                ], begin: Alignment.topLeft, end: Alignment.bottomRight))),
-            Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
+      color: _card,
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        // ── Header sem banner ──
+        Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+            child: Column(children: [
+              // Fechar
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
-                            borderRadius: BorderRadius.circular(8)),
+                            color: _card2,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _border)),
                         child: const Icon(Icons.close_rounded,
-                            color: Colors.white, size: 14)))),
-          ]),
-          const SizedBox(height: 12),
-          // Nome + handle
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Column(children: [
-                Text(p.name,
-                    style: GoogleFonts.bebasNeue(
-                        fontSize: 20, color: _text, letterSpacing: 1),
-                    textAlign: TextAlign.center),
-                Text(p.handle,
+                            color: _muted, size: 14))),
+              ]),
+              const SizedBox(height: 8),
+              // Avatar + nome
+              Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _card2,
+                      border: Border.all(color: _primary, width: 2.5)),
+                  child: Center(
+                      child:
+                          Text(p.emoji, style: const TextStyle(fontSize: 32)))),
+              const SizedBox(height: 8),
+              Text(p.name,
+                  style: GoogleFonts.bebasNeue(
+                      fontSize: 22, color: _text, letterSpacing: 1),
+                  textAlign: TextAlign.center),
+              Text(p.handle,
+                  style:
+                      GoogleFonts.familjenGrotesk(fontSize: 11, color: _muted),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 4),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.location_on_rounded, color: _muted, size: 11),
+                const SizedBox(width: 3),
+                Text(p.city,
                     style: GoogleFonts.familjenGrotesk(
-                        fontSize: 11, color: _muted),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 10),
-                // Avatar maior + botões na mesma linha
-                Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                  Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _card2,
-                          border: Border.all(color: _primary, width: 2)),
-                      child: Center(
-                          child: Text(p.emoji,
-                              style: const TextStyle(fontSize: 28)))),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: GestureDetector(
-                          onTap: () => setState(() => _following = !_following),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 11),
+                        fontSize: 10, color: _muted)),
+              ]),
+              const SizedBox(height: 10),
+              // Botões
+              Row(children: [
+                Expanded(
+                    child: GestureDetector(
+                        onTap: () => setState(() => _following = !_following),
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
                             decoration: BoxDecoration(
                                 color:
                                     _following ? Colors.transparent : _primary,
@@ -3042,14 +3109,13 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                                         letterSpacing: 1.5,
                                         color: _following
                                             ? _muted
-                                            : Colors.white))),
-                          ))),
-                  const SizedBox(width: 8),
-                  Expanded(
-                      child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 11),
+                                            : Colors.white)))))),
+                const SizedBox(width: 8),
+                Expanded(
+                    child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
                             decoration: BoxDecoration(
                                 color: _card2,
                                 borderRadius: BorderRadius.circular(8),
@@ -3059,63 +3125,111 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                                     style: GoogleFonts.bebasNeue(
                                         fontSize: 13,
                                         letterSpacing: 1.5,
-                                        color: _text))),
-                          ))),
-                ]),
-                const SizedBox(height: 10),
-                Text(p.bio,
-                    style: GoogleFonts.familjenGrotesk(
-                        fontSize: 11, color: _muted, height: 1.4),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 4),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Icon(Icons.location_on_rounded,
-                      color: _muted, size: 11),
-                  const SizedBox(width: 3),
-                  Text(p.city,
-                      style: GoogleFonts.familjenGrotesk(
-                          fontSize: 10, color: _muted))
-                ]),
-                const SizedBox(height: 12),
-                Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                        color: _card2,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: _border)),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _Stat(value: '${p.pieces}', label: 'PEÇAS'),
-                          Container(width: 1, height: 22, color: _border),
-                          _Stat(value: _fmt(p.followers), label: 'SEGUIDORES'),
-                          Container(width: 1, height: 22, color: _border),
-                          _Stat(value: 'R\$ 12k', label: 'VALOR'),
-                        ])),
-                const SizedBox(height: 12),
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('PEÇAS RECENTES',
-                        style: GoogleFonts.jetBrainsMono(
-                            fontSize: 8, color: _muted, letterSpacing: 1.5))),
-                const SizedBox(height: 8),
-                GridView.count(
-                    crossAxisCount: 3,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 2,
-                    mainAxisSpacing: 2,
-                    childAspectRatio: 1.0,
-                    children: List.generate(
-                        6,
-                        (_) => Container(
-                            color: _card2,
-                            child: Center(
+                                        color: _text)))))),
+              ]),
+              const SizedBox(height: 10),
+              Text(p.bio,
+                  style: GoogleFonts.familjenGrotesk(
+                      fontSize: 11, color: _muted, height: 1.4),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 10),
+              // Stats
+              Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                      color: _card2,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: _border)),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _Stat(value: '${p.pieces}', label: 'PEÇAS'),
+                        Container(width: 1, height: 22, color: _border),
+                        _Stat(value: _fmt(p.followers), label: 'SEGUIDORES'),
+                        Container(width: 1, height: 22, color: _border),
+                        const _Stat(value: 'R\$ 12k', label: 'VALOR'),
+                      ])),
+              const SizedBox(height: 10),
+            ])),
+        // ── Abas ──
+        TabBar(
+          controller: _tab,
+          indicatorColor: _primary,
+          indicatorWeight: 2,
+          dividerColor: _border,
+          labelColor: _primary,
+          unselectedLabelColor: _muted,
+          labelStyle: GoogleFonts.bebasNeue(fontSize: 12, letterSpacing: 1.5),
+          unselectedLabelStyle:
+              GoogleFonts.bebasNeue(fontSize: 12, letterSpacing: 1.5),
+          tabs: const [Tab(text: 'PEÇAS RECENTES'), Tab(text: 'PUBLICAÇÕES')],
+        ),
+        // ── Conteúdo das abas ──
+        SizedBox(
+            height: 220,
+            child: TabBarView(controller: _tab, children: [
+              // Peças
+              GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2,
+                  childAspectRatio: 1.0,
+                  padding: const EdgeInsets.all(2),
+                  children: List.generate(
+                      6,
+                      (_) => Container(
+                          color: _card2,
+                          child: Center(
+                              child: Text(p.emoji,
+                                  style: const TextStyle(fontSize: 22)))))),
+              // Publicações
+              GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2,
+                  childAspectRatio: 1.0,
+                  padding: const EdgeInsets.all(2),
+                  children: List.generate(
+                      6,
+                      (i) => Container(
+                          color: _card2,
+                          child: Stack(children: [
+                            Center(
                                 child: Text(p.emoji,
-                                    style: const TextStyle(fontSize: 22)))))),
-                const SizedBox(height: 14),
-              ])),
-        ])));
+                                    style: const TextStyle(fontSize: 22))),
+                            if (i % 2 == 0)
+                              Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4, vertical: 1),
+                                      decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.6),
+                                          borderRadius:
+                                              BorderRadius.circular(4)),
+                                      child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                                Icons
+                                                    .play_circle_filled_rounded,
+                                                color: _primary,
+                                                size: 8),
+                                            const SizedBox(width: 2),
+                                            Text('VID',
+                                                style:
+                                                    GoogleFonts.jetBrainsMono(
+                                                        fontSize: 6,
+                                                        color: Colors.white)),
+                                          ]))),
+                          ])))),
+            ])),
+        const SizedBox(height: 8),
+      ]),
+    );
   }
 }
 
@@ -3131,6 +3245,650 @@ class _Stat extends StatelessWidget {
             style: GoogleFonts.jetBrainsMono(
                 fontSize: 8, color: _muted, letterSpacing: 1)),
       ]);
+}
+
+// ════════════════════════════════════════
+// TELA CRIAR EVENTO
+// ════════════════════════════════════════
+class _CreateEventPage extends StatefulWidget {
+  const _CreateEventPage();
+  @override
+  State<_CreateEventPage> createState() => _CreateEventPageState();
+}
+
+class _CreateEventPageState extends State<_CreateEventPage> {
+  final _titleCtrl = TextEditingController();
+  final _descCtrl = TextEditingController();
+  final _locationCtrl = TextEditingController();
+  final _dateCtrl = TextEditingController();
+  final _timeCtrl = TextEditingController();
+  String _type = 'Presencial';
+  String _cat = 'Cards TCG';
+  bool _loading = false;
+
+  static const _types = ['Presencial', 'Online'];
+  static const _cats = [
+    'Cards TCG',
+    'Vinils & CDs',
+    'Quadrinhos & HQs',
+    'Miniaturas',
+    'Jogos & Consoles',
+    'Camisas & Futebol',
+    'Outros'
+  ];
+
+  Widget _field(String label, TextEditingController ctrl,
+      {int maxLines = 1, String? hint}) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label,
+          style: GoogleFonts.jetBrainsMono(
+              fontSize: 9, color: _muted, letterSpacing: 1.5)),
+      const SizedBox(height: 6),
+      TextField(
+        controller: ctrl,
+        maxLines: maxLines,
+        style: GoogleFonts.familjenGrotesk(color: _text, fontSize: 13),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.familjenGrotesk(color: _muted2, fontSize: 13),
+          filled: true,
+          fillColor: _card2,
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _border)),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _border)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _primary)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          isDense: true,
+        ),
+      ),
+      const SizedBox(height: 14),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+          child: Column(children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: _border))),
+          child: Row(children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                      color: _card2,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: _border)),
+                  child: const Icon(Icons.arrow_back_rounded,
+                      color: _text, size: 18)),
+            ),
+            const SizedBox(width: 14),
+            Text('CRIAR EVENTO',
+                style: GoogleFonts.bebasNeue(
+                    fontSize: 22, color: _text, letterSpacing: 2)),
+          ]),
+        ),
+        Expanded(child: LayoutBuilder(builder: (context, constraints) {
+          final isDesktop = constraints.maxWidth >= 700;
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(isDesktop ? 32 : 20),
+            child: Center(
+                child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Capa placeholder
+                    Container(
+                      height: 160,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: _card2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: _border, style: BorderStyle.solid)),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_photo_alternate_rounded,
+                                color: _muted, size: 36),
+                            const SizedBox(height: 8),
+                            Text('ADICIONAR CAPA',
+                                style: GoogleFonts.bebasNeue(
+                                    fontSize: 14,
+                                    color: _muted,
+                                    letterSpacing: 2)),
+                          ]),
+                    ),
+                    const SizedBox(height: 20),
+                    _field('NOME DO EVENTO', _titleCtrl,
+                        hint: 'Ex: Feira de Cards SP 2025'),
+                    _field('DESCRIÇÃO', _descCtrl,
+                        maxLines: 3, hint: 'Descreva o evento...'),
+                    // Tipo
+                    Text('TIPO',
+                        style: GoogleFonts.jetBrainsMono(
+                            fontSize: 9, color: _muted, letterSpacing: 1.5)),
+                    const SizedBox(height: 6),
+                    Row(
+                        children: _types
+                            .map((t) => GestureDetector(
+                                onTap: () => setState(() => _type = t),
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 10),
+                                  decoration: BoxDecoration(
+                                      color: _type == t
+                                          ? _primary.withOpacity(0.15)
+                                          : _card2,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color:
+                                              _type == t ? _primary : _border)),
+                                  child: Text(t,
+                                      style: GoogleFonts.familjenGrotesk(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              _type == t ? _primary : _muted)),
+                                )))
+                            .toList()),
+                    const SizedBox(height: 14),
+                    // Categoria
+                    Text('CATEGORIA',
+                        style: GoogleFonts.jetBrainsMono(
+                            fontSize: 9, color: _muted, letterSpacing: 1.5)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _cats
+                            .map((c) => GestureDetector(
+                                onTap: () => setState(() => _cat = c),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                      color: _cat == c
+                                          ? _primary.withOpacity(0.15)
+                                          : _card2,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color:
+                                              _cat == c ? _primary : _border)),
+                                  child: Text(c,
+                                      style: GoogleFonts.familjenGrotesk(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              _cat == c ? _primary : _muted)),
+                                )))
+                            .toList()),
+                    const SizedBox(height: 14),
+                    if (isDesktop)
+                      Row(children: [
+                        Expanded(
+                            child: _field('DATA', _dateCtrl,
+                                hint: 'Ex: 15 Mai 2025')),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: _field('HORÁRIO', _timeCtrl,
+                                hint: 'Ex: 09:00 - 18:00')),
+                      ])
+                    else ...[
+                      _field('DATA', _dateCtrl, hint: 'Ex: 15 Mai 2025'),
+                      _field('HORÁRIO', _timeCtrl, hint: 'Ex: 09:00 - 18:00'),
+                    ],
+                    _field(_type == 'Online' ? 'LINK DO EVENTO' : 'LOCAL',
+                        _locationCtrl,
+                        hint: _type == 'Online'
+                            ? 'Ex: youtube.com/live'
+                            : 'Ex: Expo Center Norte, São Paulo'),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _loading
+                              ? null
+                              : () {
+                                  if (_titleCtrl.text.trim().isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Preencha o nome do evento',
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 13)),
+                                            backgroundColor:
+                                                Colors.red.shade800,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10))));
+                                    return;
+                                  }
+                                  setState(() => _loading = true);
+                                  Future.delayed(const Duration(seconds: 1),
+                                      () {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Evento criado com sucesso! 🎉',
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 13)),
+                                            backgroundColor: _green,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10))));
+                                  });
+                                },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: _primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              elevation: 0),
+                          child: _loading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2))
+                              : Text('PUBLICAR EVENTO',
+                                  style: GoogleFonts.bebasNeue(
+                                      fontSize: 18, letterSpacing: 2)),
+                        )),
+                    const SizedBox(height: 20),
+                  ]),
+            )),
+          );
+        })),
+      ])),
+    );
+  }
+}
+
+// ════════════════════════════════════════
+// TELA CRIAR COMUNIDADE
+// ════════════════════════════════════════
+class _CreateCommunityPage extends StatefulWidget {
+  const _CreateCommunityPage();
+  @override
+  State<_CreateCommunityPage> createState() => _CreateCommunityPageState();
+}
+
+class _CreateCommunityPageState extends State<_CreateCommunityPage> {
+  final _nameCtrl = TextEditingController();
+  final _descCtrl = TextEditingController();
+  String _cat = 'Cards TCG';
+  final List<String> _tags = [];
+  final _tagCtrl = TextEditingController();
+  bool _loading = false;
+  bool _isPrivate = false;
+
+  static const _cats = [
+    'Cards TCG',
+    'Vinils & CDs',
+    'Quadrinhos',
+    'Miniaturas',
+    'Jogos & Consoles',
+    'Camisas',
+    'Tênis',
+    'Outros'
+  ];
+
+  Widget _field(String label, TextEditingController ctrl,
+      {int maxLines = 1, String? hint}) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label,
+          style: GoogleFonts.jetBrainsMono(
+              fontSize: 9, color: _muted, letterSpacing: 1.5)),
+      const SizedBox(height: 6),
+      TextField(
+        controller: ctrl,
+        maxLines: maxLines,
+        style: GoogleFonts.familjenGrotesk(color: _text, fontSize: 13),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.familjenGrotesk(color: _muted2, fontSize: 13),
+          filled: true,
+          fillColor: _card2,
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _border)),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _border)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _primary)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          isDense: true,
+        ),
+      ),
+      const SizedBox(height: 14),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+          child: Column(children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: _border))),
+          child: Row(children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                      color: _card2,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: _border)),
+                  child: const Icon(Icons.arrow_back_rounded,
+                      color: _text, size: 18)),
+            ),
+            const SizedBox(width: 14),
+            Text('CRIAR COMUNIDADE',
+                style: GoogleFonts.bebasNeue(
+                    fontSize: 22, color: _text, letterSpacing: 2)),
+          ]),
+        ),
+        Expanded(child: LayoutBuilder(builder: (context, constraints) {
+          final isDesktop = constraints.maxWidth >= 700;
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(isDesktop ? 32 : 20),
+            child: Center(
+                child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Capa placeholder
+                    Container(
+                      height: 160,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: _card2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _border)),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_photo_alternate_rounded,
+                                color: _muted, size: 36),
+                            const SizedBox(height: 8),
+                            Text('ADICIONAR CAPA',
+                                style: GoogleFonts.bebasNeue(
+                                    fontSize: 14,
+                                    color: _muted,
+                                    letterSpacing: 2)),
+                          ]),
+                    ),
+                    const SizedBox(height: 20),
+                    _field('NOME DA COMUNIDADE', _nameCtrl,
+                        hint: 'Ex: Pokémon TCG Brasil'),
+                    _field('DESCRIÇÃO', _descCtrl,
+                        maxLines: 3, hint: 'Descreva sua comunidade...'),
+                    // Categoria
+                    Text('CATEGORIA',
+                        style: GoogleFonts.jetBrainsMono(
+                            fontSize: 9, color: _muted, letterSpacing: 1.5)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _cats
+                            .map((c) => GestureDetector(
+                                onTap: () => setState(() => _cat = c),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                      color: _cat == c
+                                          ? _primary.withOpacity(0.15)
+                                          : _card2,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color:
+                                              _cat == c ? _primary : _border)),
+                                  child: Text(c,
+                                      style: GoogleFonts.familjenGrotesk(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              _cat == c ? _primary : _muted)),
+                                )))
+                            .toList()),
+                    const SizedBox(height: 14),
+                    // Tags
+                    Text('TAGS',
+                        style: GoogleFonts.jetBrainsMono(
+                            fontSize: 9, color: _muted, letterSpacing: 1.5)),
+                    const SizedBox(height: 6),
+                    Row(children: [
+                      Expanded(
+                          child: TextField(
+                        controller: _tagCtrl,
+                        style: GoogleFonts.familjenGrotesk(
+                            color: _text, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Ex: Pokémon, Trade, TCG...',
+                          hintStyle: GoogleFonts.familjenGrotesk(
+                              color: _muted2, fontSize: 13),
+                          filled: true,
+                          fillColor: _card2,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: _border)),
+                          enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: _border)),
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: _primary)),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 12),
+                          isDense: true,
+                        ),
+                      )),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          final t = _tagCtrl.text.trim();
+                          if (t.isNotEmpty && _tags.length < 5) {
+                            setState(() {
+                              _tags.add(t);
+                              _tagCtrl.clear();
+                            });
+                          }
+                        },
+                        child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: _primary,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: const Icon(Icons.add_rounded,
+                                color: Colors.white, size: 20)),
+                      ),
+                    ]),
+                    if (_tags.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: _tags
+                              .map((t) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                      color: _primary.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                          color: _primary.withOpacity(0.4))),
+                                  child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('#$t',
+                                            style: GoogleFonts.jetBrainsMono(
+                                                fontSize: 11, color: _primary)),
+                                        const SizedBox(width: 6),
+                                        GestureDetector(
+                                            onTap: () =>
+                                                setState(() => _tags.remove(t)),
+                                            child: const Icon(
+                                                Icons.close_rounded,
+                                                color: _primary,
+                                                size: 12)),
+                                      ])))
+                              .toList()),
+                    ],
+                    const SizedBox(height: 14),
+                    // Privacidade
+                    Text('PRIVACIDADE',
+                        style: GoogleFonts.jetBrainsMono(
+                            fontSize: 9, color: _muted, letterSpacing: 1.5)),
+                    const SizedBox(height: 6),
+                    Row(children: [
+                      _PrivOption(
+                          label: 'Pública',
+                          icon: Icons.public_rounded,
+                          selected: !_isPrivate,
+                          onTap: () => setState(() => _isPrivate = false)),
+                      const SizedBox(width: 8),
+                      _PrivOption(
+                          label: 'Privada',
+                          icon: Icons.lock_rounded,
+                          selected: _isPrivate,
+                          onTap: () => setState(() => _isPrivate = true)),
+                    ]),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _loading
+                              ? null
+                              : () {
+                                  if (_nameCtrl.text.trim().isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Preencha o nome da comunidade',
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 13)),
+                                            backgroundColor:
+                                                Colors.red.shade800,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10))));
+                                    return;
+                                  }
+                                  setState(() => _loading = true);
+                                  Future.delayed(const Duration(seconds: 1),
+                                      () {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Comunidade criada com sucesso! 🎉',
+                                                style:
+                                                    GoogleFonts.familjenGrotesk(
+                                                        fontSize: 13)),
+                                            backgroundColor: _green,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10))));
+                                  });
+                                },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: _primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              elevation: 0),
+                          child: _loading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2))
+                              : Text('CRIAR COMUNIDADE',
+                                  style: GoogleFonts.bebasNeue(
+                                      fontSize: 18, letterSpacing: 2)),
+                        )),
+                    const SizedBox(height: 20),
+                  ]),
+            )),
+          );
+        })),
+      ])),
+    );
+  }
+}
+
+class _PrivOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  const _PrivOption(
+      {required this.label,
+      required this.icon,
+      required this.selected,
+      required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+            color: selected ? _primary.withOpacity(0.15) : _card2,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: selected ? _primary : _border)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, color: selected ? _primary : _muted, size: 15),
+          const SizedBox(width: 6),
+          Text(label,
+              style: GoogleFonts.familjenGrotesk(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? _primary : _muted)),
+        ]),
+      ));
 }
 
 // ════════════════════════════════════════
